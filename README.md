@@ -2,4 +2,4 @@
 
 Puedes editar este esquema abriéndolo en [Excalidraw+](https://excalidraw.com):
 
-[Ver archivo .excalidraw](./assets/KeyCode.excalidraw)
+[Ver archivo .excalidraw](KeyCode.excalidraw)
