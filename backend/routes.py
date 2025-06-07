@@ -1,0 +1,127 @@
+from flask import request, jsonify
+from base.db import db
+from base.models import Usuario, Credencial, Grupo, RegistroAcceso, CredencialCompartidaUsuario
+from utils.contrasena import generar_contrasena, hashear_contrasena, checkear_contrasena
+from utils.cifrado_aes import generar_clave_usuario_cifrada
+from utils.twofa import generar_clave_2fa, generar_uri_2fa, verificar_codigo_2fa
+from utils.correos import enviar_correo_contrasena
+from utils.cambiar_contrasena import cambiar_contrasena
+from utils.auth_token import generar_token, verificar_token
+
+def registrar_rutas(app):
+    @app.route('/crear_usuario', methods=['POST'])
+    def crear_usuario():
+        data = request.get_json()
+
+        if not all(k in data for k in ('nombre_usuario', 'rol', 'correo')):
+            return jsonify({'error': 'Faltan campos requeridos'}), 400
+        
+        if Usuario.query.filter_by(correo=data['correo']).first():
+            return jsonify({'error': 'Este correo ya está registrado'}), 409
+
+        contrasena_temp = generar_contrasena()
+
+        clave_cifrada, salt = generar_clave_usuario_cifrada(contrasena_temp)  
+
+        nuevo = Usuario(
+            nombre_usuario=data['nombre_usuario'],
+            correo=data['correo'],  
+            contrasena_hash=hashear_contrasena(contrasena_temp),
+            rol=data['rol'],
+            clave_cifrada=clave_cifrada,
+            salt=salt,
+        )
+
+        db.session.add(nuevo)
+        db.session.commit()
+
+        enviar_correo_contrasena(data['correo'], data['nombre_usuario'], contrasena_temp)
+
+        return jsonify({
+            'mensaje': 'Usuario creado exitosamente',
+        }), 201
+
+    @app.route('/login', methods=['POST'])
+    def login():
+        data = request.get_json()
+
+        usuario = Usuario.query.filter_by(nombre_usuario=data.get('nombre_usuario')).first()
+        if not usuario:
+            return jsonify({'error': 'Usuario no encontrado'}), 404
+
+        if not checkear_contrasena(usuario.contrasena_hash, data.get('contrasena')):
+            return jsonify({'error': 'Contraseña incorrecta'}), 401
+
+        return jsonify({
+            'mensaje': 'Login exitoso',
+            'usuario': usuario.id,
+            'contrasena_temporal': usuario.contrasena_temporal
+        }), 200
+
+    @app.route('/primer_login', methods=['POST'])
+    def primer_login():
+        data = request.get_json()
+        usuario = Usuario.query.filter_by(id=data.get('usuario_id')).first()
+
+        if not usuario:
+            return jsonify({'error': 'Usuario no encontrado'}), 404
+
+        if data.get('mantener_contrasena'):
+            usuario.contrasena_temporal = False
+            db.session.commit()
+            return jsonify({'mensaje': 'Contraseña temporal mantenida'}), 200
+
+        nueva_contrasena = data.get('nueva_contrasena')
+        if not nueva_contrasena:
+            return jsonify({'error': 'Se requiere nueva contraseña'}), 400
+
+        cambiar_contrasena(usuario, nueva_contrasena, temporal=False)
+        db.session.commit()
+
+        return jsonify({'mensaje': 'Contraseña cambiada exitosamente'}), 200
+
+    @app.route('/configurar_2fa', methods=['POST'])
+    def configurar_2fa():
+        data = request.get_json()
+        usuario = Usuario.query.filter_by(id=data.get('usuario_id')).first()
+
+        if not usuario:
+            return jsonify({'error': 'Usuario no encontrado'}), 404
+
+        if usuario.clave_2fa:
+            return jsonify({'error': '2FA ya configurado para este usuario'}), 400
+
+        clave_2fa = generar_clave_2fa()
+        uri = generar_uri_2fa(clave_2fa, usuario.nombre_usuario)
+
+        usuario.clave_2fa = clave_2fa
+        db.session.commit()
+
+        return jsonify({
+            'mensaje': 'Codigo uri enviado',
+            'uri': uri
+        }), 200
+
+
+    @app.route('/verificar_2fa', methods=['POST'])
+    def verificar_2fa():
+        data = request.get_json()
+        usuario = Usuario.query.filter_by(id=data.get('usuario_id')).first()
+
+        if not usuario or not usuario.clave_2fa:
+            return jsonify({'error': 'Usuario o 2FA no configurado'}), 404
+
+        codigo_ingresado = data.get('codigo')
+
+        totp = verificar_codigo_2fa(usuario.clave_2fa)
+        if totp.verify(codigo_ingresado):
+            db.session.commit()
+
+            token = generar_token(usuario.id)
+
+            return jsonify({
+                'mensaje': '2FA verificado correctamente',
+                'token': token
+            }), 200
+        else:
+            return jsonify({'error': 'Código incorrecto'}), 401

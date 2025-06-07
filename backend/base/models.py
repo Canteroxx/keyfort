@@ -1,7 +1,5 @@
-from flask_sqlalchemy import SQLAlchemy
+from base.db import db
 from datetime import datetime
-
-db = SQLAlchemy()
 
 usuarios_grupos = db.Table('usuarios_grupos',
     db.Column('usuario_id', db.Integer, db.ForeignKey('usuarios.id'), primary_key=True),
@@ -18,14 +16,18 @@ class Usuario(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     nombre_usuario = db.Column(db.String(80), unique=True, nullable=False)
+    correo = db.Column(db.String(120), unique=True, nullable=False)
     contrasena_hash = db.Column(db.String(128), nullable=False)
     rol = db.Column(db.String(20), nullable=False) 
-    clave_2fa = db.Column(db.String(16), nullable=True)
-    clave_cifrada = db.Column(db.LargeBinary, nullable=False)  
+    clave_2fa = db.Column(db.String(16), nullable=True, default=None)
+    clave_cifrada = db.Column(db.LargeBinary, nullable=False)
+    salt = db.Column(db.LargeBinary, nullable=False)
+    contrasena_temporal = db.Column(db.Boolean, default=True)  
 
     grupos = db.relationship('Grupo', secondary=usuarios_grupos, back_populates='usuarios')
     credenciales_propias = db.relationship('Credencial', backref='duenio', lazy=True)
     accesos = db.relationship('RegistroAcceso', backref='usuario', lazy=True)
+
 
 class Grupo(db.Model):
     __tablename__ = 'grupos'
