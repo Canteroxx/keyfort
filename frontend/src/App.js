@@ -9,6 +9,7 @@ import Historial from './pages/Historial';
 import AddUser from './pages/AddUser';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
+import Solicitar from './pages/Solicitar';
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Navigate to="/Login" />} />
         <Route path="/Login" element={<Login />} />
+        <Route path="/LostMyPassword" element={<Solicitar />} />
 
         <Route path="/" element={<MenuAdmin />} >
           <Route path="/Settings" element={<Ajustes />} />

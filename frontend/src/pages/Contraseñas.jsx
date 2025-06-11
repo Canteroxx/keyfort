@@ -1,8 +1,132 @@
-import React from 'react'
+import { React, useState } from 'react'
+import { FaPlus, FaEllipsisV, FaEye, FaEyeSlash} from 'react-icons/fa'
+
 export default function Contraseñas() {
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [selectedName, setSelectedName] = useState(null);
+  const [contextMenuUser, setContextMenuUser] = useState(null);
+
+	const passwords = [
+	{ name: 'Discord', password: '218494803', user:'Canteroxx', aggregate: 'Enero 2, 2023', modified: 'Junio 23, 2024' },
+	{ name: 'Instagram', password: '135834300', user:'P4steroxx', aggregate: 'Diciembre 27, 2021', modified: 'Febrero 2, 2022' },
+	{ name: 'Google', password: '77547339', user:'Canteroxx92', aggregate: 'Octubre 3, 2022', modified: 'Mayo 15, 2023' },
+	{ name: 'Lolsito', password: '45214786',user:'ElCanteXX',  aggregate: 'Marzo 5, 2023', modified: 'Abril 30, 2024' },
+	];
+
   return (
-	<div className='text-4xl p-10 font-mono '>
-	 	<p className='p-10 text-white'>Contraseñas</p>
+	<div className='text-3xl p-10 font-mono w-full text-md font-medium transition-all relative'>
+	  <p className='p-10 text-6xl text-white'>Contraseñas</p>
+	  <nav className='justify-items-end px-5 pb-5'>
+		<button onClick={() => {setShowAddModal(true); setContextMenuUser(null);}}
+		  className="flex flex-row items-center gap-3 px-4 py-2 rounded-md text-white text-xl bg-cyan-700 border border-cyan-300 hover:bg-cyan-800">
+		  <FaPlus />
+		  <span>Add Password</span>
+		</button>
+	  </nav>
+
+	  <section className='p-12 space-y-5 bg-gray-900 border border-white/32 rounded-xl'>
+		{passwords.map((user, i) => (
+		  <article
+			className='relative flex flex-row justify-between items-center bg-gray-900 text-white p-4 rounded-xl border border-white/32 hover:bg-cyan-800 cursor-pointer flex-1'>
+			<p>{user.name}</p>
+			<button key={i} onClick={() => {setSelectedName(user);setShowInfoModal(true);setContextMenuUser(null);}}>
+			  <FaEllipsisV />
+			</button>
+		
+		  </article>
+		))}
+	  </section>
+
+	  {showAddModal && (
+		<div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
+		  <div className="bg-white rounded-xl p-6 w-96 text-black shadow-lg space-y-4">
+			<h2 className="text-xl font-semibold">Agregar Contraseña</h2>
+
+			<div className="flex flex-col space-y-2">
+			  <label htmlFor="name" className="text-lg">Nombre:</label>
+			  <input id="name" type="text" className="border border-black rounded-md px-2 py-1" />
+			  <label htmlFor="name" className="text-lg">Usuario:</label>
+			  <input id="name" type="text" className="border border-black rounded-md px-2 py-1" />
+			  <label htmlFor="password" className="text-lg">Contraseña:</label>
+			  <div className="relative">
+        		<input id="password" type={showPassword ? "text" : "password"} placeholder="Password" className="border border-black rounded-md px-2 py-1 pr-10 w-full text-black"/>
+        		<span onClick={() => setShowPassword(!showPassword)}
+          		className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-600">
+          		{showPassword ? <FaEyeSlash /> : <FaEye />}
+        		</span>
+      		  </div>
+			  </div>
+				<button onClick={() => setShowAddModal(false)}
+			  className="w-full mt-4 bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800">
+			  Guardar
+			</button>
+		  </div>
+		</div>
+	  )}
+
+		{showInfoModal && (
+		<div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
+		  <div className="bg-white rounded-xl p-6 w-96 text-black shadow-lg space-y-4">
+			<h2 className="text-xl font-semibold">Info de {selectedName?.name}</h2>
+			<div className="flex flex-col space-y-2">
+			  <label htmlFor="nameEdit" className="text-lg">User: {selectedName?.user}</label>
+			  <div className="relative">
+				<div className="flex items-center text-lg">
+				<label htmlFor="passwordEdit" className="text-lg">Contraseña:</label>
+					<div className="flex items-center justify-between pl-2">
+						<input id="passwordEdit" type={showPassword ? "text" : "password"} value={selectedName?.password || ""} readOnly
+						className="bg-transparent w-44"/>
+						<span onClick={() => setShowPassword(!showPassword)} className="cursor-pointer text-2xl pl-2">
+						{showPassword ? <FaEyeSlash /> : <FaEye />}
+						</span>
+					</div>
+				</div>
+			  </div>
+			  <label htmlFor="passwordEdit" className="text-lg">Creado: {selectedName?.aggregate} </label>
+			  <label htmlFor="passwordEdit" className="text-lg">Modificado: {selectedName?.modified} </label>
+			</div>
+            <article className='flex justify-between items-center text-lg w-full'>
+            <a href="" className='text-red-400 font-semibold hover:underline'>Eliminar</a>
+            <div className='flex space-x-1'>
+            <button onClick={() => setShowEditModal(true)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900">
+              Editar
+            </button>
+            <button onClick={() => setShowInfoModal(false)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900">
+              Cerrar
+            </button>
+            </div>
+            </article>
+		  </div>
+		</div>
+	  )}
+
+
+
+	  {showEditModal && (
+		<div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
+		  <div className="bg-white rounded-xl p-6 w-96 text-black shadow-lg space-y-4">
+			<h2 className="text-xl font-semibold">Editar: {selectedName?.name}</h2>
+			<div className="text-xl flex flex-col space-y-2">
+			  <label htmlFor="nameEdit" className="text-lg">User:</label>
+			  <input id="nameEdit" type="text" placeholder={selectedName?.user} className="border border-black rounded-md px-2 py-1" />
+			  <label htmlFor="passwordEdit" className="text-lg">Password:</label>
+			  <input id="passwordEdit" type="text" placeholder={selectedName?.password} className="border border-black rounded-md px-2 py-1" />
+			</div>
+            <article className='flex justify-end items-center text-lg w-full space-x-2 px-4'>
+            <button onClick={() => setShowEditModal(false)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900">
+              Guardar
+            </button>
+            <button onClick={() => setShowEditModal(false)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900">
+              Cerrar
+            </button>
+            </article>
+		  </div>
+		</div>
+	  )}
+
 	</div>
   )
 }
