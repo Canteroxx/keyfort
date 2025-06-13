@@ -1,5 +1,5 @@
 import React from 'react'
-import { Link } from 'react-router-dom'; // Asegúrate de importar esto
+import { Link } from 'react-router-dom'; 
 import icon from '../assets/icon.png';
 
 export default function Solicitar() {
@@ -12,7 +12,7 @@ export default function Solicitar() {
         <article className='bg-gray-900 p-12 rounded-md border w-[600px] max-w-full transition-all relative'>
           <h2 className="text-center text-xl font-semibold mb-4">Solicitar Nueva contraseña</h2>
             <div className="text-xl flex flex-col space-y-2">
-              <label htmlFor="nameEdit" className="text-lg">Ingrese su Nombre de Usuario:</label>
+              <label htmlFor="nameEdit" className="text-lg">Ingrese su Correo:</label>
               <input id="nameEdit" type="text" placeholder='Name' className="border border-black rounded-md px-2 py-1 text-black" />
             </div>
             <a href="/Login" className='inline text-lg text-cyan-500 hover:underline'>Iniciar Sesion</a>

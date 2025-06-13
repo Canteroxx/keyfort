@@ -8,13 +8,7 @@ export default function Contraseñas() {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedName, setSelectedName] = useState(null);
   const [contextMenuUser, setContextMenuUser] = useState(null);
-
-	const passwords = [
-	{ name: 'Discord', password: '218494803', user:'Canteroxx', aggregate: 'Enero 2, 2023', modified: 'Junio 23, 2024' },
-	{ name: 'Instagram', password: '135834300', user:'P4steroxx', aggregate: 'Diciembre 27, 2021', modified: 'Febrero 2, 2022' },
-	{ name: 'Google', password: '77547339', user:'Canteroxx92', aggregate: 'Octubre 3, 2022', modified: 'Mayo 15, 2023' },
-	{ name: 'Lolsito', password: '45214786',user:'ElCanteXX',  aggregate: 'Marzo 5, 2023', modified: 'Abril 30, 2024' },
-	];
+  const passwords = [];
 
   return (
 	<div className='text-3xl p-10 font-mono w-full text-md font-medium transition-all relative'>

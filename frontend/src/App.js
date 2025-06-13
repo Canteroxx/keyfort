@@ -1,15 +1,18 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MenuAdmin from './components/MenuAdmin'
-import Ajustes from './pages/Ajustes'
-import Contraseñas from './pages/Contraseñas';
-import Enviar from './pages/Enviar';
-import Grupos from './pages/Grupos';
-import Historial from './pages/Historial';
-import AddUser from './pages/AddUser';
+import Ajustes from './pages/admin/Ajustes'
+import Contraseñas from './pages/admin/Contraseñas';
+import Enviar from './pages/admin/Enviar';
+import Grupos from './pages/admin/Grupos';
+import Historial from './pages/admin/Historial';
+import AddUser from './pages/admin/AddUser';
 import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
+import Dashboard from './pages/admin/Dashboard';
 import Solicitar from './pages/Solicitar';
+import PrimerLogin from './pages/PrimerLogin';
+import Conf2FA from './pages/Conf2FA';
+import Verificar2FA from './pages/Verificar2FA';
 
 function App() {
   return (
@@ -18,6 +21,9 @@ function App() {
         <Route path="/" element={<Navigate to="/Login" />} />
         <Route path="/Login" element={<Login />} />
         <Route path="/LostMyPassword" element={<Solicitar />} />
+        <Route path="/PrimerLogin" element={<PrimerLogin />}/>
+        <Route path="/Conf2FA" element={<Conf2FA />}/>
+        <Route path="/Verificar2FA" element={<Verificar2FA />}/>
 
         <Route path="/" element={<MenuAdmin />} >
           <Route path="/Settings" element={<Ajustes />} />
