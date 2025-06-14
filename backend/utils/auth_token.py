@@ -3,10 +3,13 @@ from datetime import datetime, timedelta
 from flask import request, jsonify, g, current_app
 from functools import wraps
 
-def generar_token(usuario_id, duracion_horas=1):
+def generar_token(usuario_id, usuario_rol, usuario_contrasena, usuario_verificado, duracion_horas=1):
     expiracion = datetime.utcnow() + timedelta(hours=duracion_horas)
     payload = {
         'usuario_id': usuario_id,
+        'rol': usuario_rol,
+        'contrasena_temporal': usuario_contrasena,
+        'verificado_2fa': usuario_verificado,
         'exp': expiracion
     }
     token = jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')
