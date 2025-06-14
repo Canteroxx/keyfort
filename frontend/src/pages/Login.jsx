@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import icon from '../assets/icon.png';
-import { loginUsuario } from '../services/service';;
+import { loginUsuario } from '../services/service';
+
 export default function Login() {
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
@@ -10,18 +11,23 @@ export default function Login() {
   const handleLogin = async () => {
     try {
       const data = await loginUsuario(correo, contrasena);
+
       localStorage.setItem('usuario_id', data.usuario);
+      localStorage.setItem('contrasena_temporal', data.contrasena_temporal);
+      localStorage.setItem('verificado_2fa', data.verificado_2fa);
+
       if (data.contrasena_temporal) {
         navigate('/PrimerLogin');
-      } else if (!data.verificado_2fa){
+      } else if (!data.verificado_2fa) {
         navigate('/Conf2FA');
       } else {
-        navigate('/Verificar2FA')
+        navigate('/Verificar2FA');
       }
     } catch (error) {
       alert(error.message);
     }
   };
+
 
   return (
     <div className='flex justify-center min-h-screen bg-gray-900'>

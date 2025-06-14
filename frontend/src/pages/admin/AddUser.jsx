@@ -1,7 +1,6 @@
 import React, { useState, useEffect, use } from 'react';
 import { FaPlus, FaEllipsisV } from 'react-icons/fa';
 import { crearUsuario, obtenerUsuarios } from '../../services/service';
-import useAuth from '../../services/useAuth';
 
 export default function AddUser() {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -13,7 +12,6 @@ export default function AddUser() {
   const [nombre, setNombre] = useState('');
   const [correo, setCorreo] = useState('');
   const [rol, setRol] = useState('Usuario');
-  const usuario = useAuth('Admin');
   
   useEffect(() => {
     cargarUsuarios();
@@ -38,7 +36,6 @@ export default function AddUser() {
       setRol('Usuario');
       cargarUsuarios();
     } catch (error) {
-      console.error('Error al crear usuario:', error);
       alert(error.message);
     }
   };

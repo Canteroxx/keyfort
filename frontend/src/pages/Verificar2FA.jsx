@@ -3,13 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { verificarCodigo2FA } from '../services/service';
 import { jwtDecode } from 'jwt-decode';
 import icon from '../assets/icon.png';
-import useAuthBoolean from '../services/useAuthBoolean';
 
 export default function Verificar2FA() {
   const [codigo, setCodigo] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const usuarioId = localStorage.getItem('usuario_id');
+
   const handleVerificar = async () => {
     setError('');
 
@@ -21,20 +21,23 @@ export default function Verificar2FA() {
     try {
       const token = await verificarCodigo2FA(usuarioId, codigo);
       localStorage.setItem('token', token);
-	  localStorage.removeItem('usuario_id');
+      localStorage.removeItem('usuario_id');
+      localStorage.removeItem('contrasena_temporal');
+      localStorage.removeItem('verificado_2fa');
 
-    const payload = jwtDecode(token);
+      const payload = jwtDecode(token);
       if (payload.rol === 'Admin') {
         navigate('/Dashboard');
       } else if (payload.rol === 'Usuario') {
         navigate('/PasswordsUser');
       } else {
-        navigate('/AccesoDenegado');
+        alert('Tu rol no está autorizado para acceder al sistema.');
       }
-      } catch (err) {
-      setError(err.message);
+    } catch (error) {
+      setError(error.message);
     }
   };
+
 
   return (
     <div className='flex justify-center min-h-screen bg-gray-900'>

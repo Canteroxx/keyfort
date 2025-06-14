@@ -39,12 +39,13 @@ export async function loginUsuario(correo, contrasena) {
     body: JSON.stringify({ correo, contrasena })
   });
 
+  const data = await response.json();
+  
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Error al iniciar sesión');
+    throw new Error(data.error || 'Error al iniciar sesión');
   }
 
-  return await response.json();
+  return data;
 }
 
 export async function enviarPrimerLogin({ usuario_id, nueva_contrasena = null, mantener_contrasena = false }) {
@@ -64,30 +65,25 @@ export async function enviarPrimerLogin({ usuario_id, nueva_contrasena = null, m
     throw new Error(data.error || 'Error al procesar el primer login');
   }
 
-  return data.mensaje;
+  return data;
 }
 
 export async function configurar2FA(usuarioId) {
-  try {
-    const response = await fetch(`${backendUrl}/configurar_2fa`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ usuario_id: usuarioId })
-    });
+  const response = await fetch(`${backendUrl}/configurar_2fa`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ usuario_id: usuarioId })
+  });
 
-    const data = await response.json();
+  const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.error || 'Error al configurar 2FA');
-    }
-
-    return data.uri;
-  } catch (err) {
-    console.error(err);
-    throw err;
+  if (!response.ok) {
+    throw new Error(data.error || 'Error al configurar 2FA');
   }
+
+  return await data.uri;
 }
 
 export async function verificarCodigo2FA(usuarioId, codigo) {

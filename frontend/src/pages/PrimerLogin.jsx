@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { enviarPrimerLogin } from '../services/service';;
 import icon from '../assets/icon.png';
-import useAuthBoolean from '../services/useAuthBoolean';
 
 export default function Primer_Login() {
   const [contrasena, setContrasena] = useState('');
@@ -11,7 +10,6 @@ export default function Primer_Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const usuarioId = localStorage.getItem('usuario_id');
-  const usuario = useAuthBoolean(true, false);
   const handleGuardar = async () => {
     setError('');
 
@@ -21,14 +19,17 @@ export default function Primer_Login() {
     }
 
     try {
-      await enviarPrimerLogin({
+      const data = await enviarPrimerLogin({
         usuario_id: usuarioId,
         nueva_contrasena: contrasena
       });
+      localStorage.setItem('contrasena_temporal', data.contrasena_temporal);
 
-      navigate('/Conf2FA');
-    } catch (err) {
-      setError(err.message);
+      if(!data.contrasena_temporal){
+        navigate('/Conf2FA');
+      }
+    } catch (error) {
+      setError(error.message);
     }
   };
 
@@ -36,14 +37,18 @@ export default function Primer_Login() {
     setError('');
 
     try {
-      await enviarPrimerLogin({
+      const data = await enviarPrimerLogin({
         usuario_id: usuarioId,
         mantener_contrasena: true
       });
 
-      navigate('/Conf2FA');
-    } catch (err) {
-      setError(err.message);
+      localStorage.setItem('contrasena_temporal', data.contrasena_temporal);
+      
+      if(!data.contrasena_temporal){
+        navigate('/Conf2FA');
+      }
+    } catch (error) {
+      setError(error.message);
     }
   };
 

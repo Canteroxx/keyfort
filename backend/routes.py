@@ -1,4 +1,5 @@
 from flask import request, jsonify
+from sqlalchemy.exc import SQLAlchemyError
 from base.db import db
 from base.models import Usuario, Credencial, Grupo, RegistroAcceso, CredencialCompartidaUsuario
 from utils.contrasena import generar_contrasena, hashear_contrasena, checkear_contrasena
@@ -22,13 +23,14 @@ def registrar_rutas(app):
 
         return jsonify(lista_usuarios), 200
 
+
     @app.route('/crear_usuario', methods=['POST'])
     def crear_usuario():
         data = request.get_json()
 
         if not all(k in data for k in ('nombre_usuario', 'rol', 'correo')):
             return jsonify({'error': 'Faltan campos requeridos'}), 400
-        
+
         if Usuario.query.filter_by(correo=data['correo']).first():
             return jsonify({'error': 'Este correo ya está registrado'}), 409
 
@@ -46,13 +48,20 @@ def registrar_rutas(app):
         )
 
         db.session.add(nuevo)
-        db.session.commit()
 
-        enviar_correo_contrasena(data['correo'], data['nombre_usuario'], contrasena_temp)
+        try:
+            enviar_correo_contrasena(data['correo'], data['nombre_usuario'], contrasena_temp)
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': 'No se pudo enviar el correo, usuario no creado.', 'detalle': str(e)}), 500
 
-        return jsonify({
-            'mensaje': 'Usuario creado exitosamente',
-        }), 201
+        try:
+            db.session.commit()
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return jsonify({'error': 'Error al guardar usuario en la base de datos.', 'detalle': str(e)}), 500
+
+        return jsonify({'mensaje': 'Usuario creado exitosamente'}), 201
 
     @app.route('/login', methods=['POST'])
     def login():
@@ -96,7 +105,10 @@ def registrar_rutas(app):
         usuario.contrasena_temporal = False
         db.session.commit()
 
-        return jsonify({'mensaje': 'Contraseña cambiada exitosamente'}), 200
+        return jsonify({
+            'mensaje': 'Contraseña cambiada exitosamente', 
+            'contrasena_temporal': usuario.contrasena_temporal
+        }), 200
 
 
     @app.route('/configurar_2fa', methods=['POST'])

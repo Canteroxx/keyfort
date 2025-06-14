@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
 import { configurar2FA, verificarCodigo2FA } from '../services/service';
 import icon from '../assets/icon.png';
-import useAuthBoolean from '../services/useAuthBoolean';
 
-export default function PrimerLogin2FA() {
+export default function Conf2FA() {
   const [qrUri, setQrUri] = useState('');
   const [codigo, setCodigo] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const usuarioId = localStorage.getItem('usuario_id');
+  
   useEffect(() => {
     const fetchQR = async () => {
       try {
@@ -35,11 +36,22 @@ export default function PrimerLogin2FA() {
       const token = await verificarCodigo2FA(usuarioId, codigo);
       localStorage.setItem('token', token);
       localStorage.removeItem('usuario_id');
-      navigate('/Dashboard');
-    } catch (err) {
-      setError(err.message);
+      localStorage.removeItem('contrasena_temporal');
+      localStorage.removeItem('verificado_2fa');
+
+      const payload = jwtDecode(token);
+      if (payload.rol === 'Admin') {
+        navigate('/Dashboard');
+      } else if (payload.rol === 'Usuario') {
+        navigate('/PasswordsUser');
+      } else {
+        alert('Tu rol no está autorizado para acceder al sistema.');
+      }
+    } catch (error) {
+      setError(error.message);
     }
   };
+
 
   return (
     <div className="flex justify-center min-h-screen bg-gray-900">

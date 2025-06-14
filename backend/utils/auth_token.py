@@ -8,8 +8,6 @@ def generar_token(usuario_id, usuario_rol, usuario_contrasena, usuario_verificad
     payload = {
         'usuario_id': usuario_id,
         'rol': usuario_rol,
-        'contrasena_temporal': usuario_contrasena,
-        'verificado_2fa': usuario_verificado,
         'exp': expiracion
     }
     token = jwt.encode(payload, current_app.config['SECRET_KEY'], algorithm='HS256')

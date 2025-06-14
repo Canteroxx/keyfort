@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 
 import {
@@ -20,6 +20,12 @@ export default function Menu() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(true);
   const toggleMenu = () => setIsOpen(!isOpen);
+  const navigate = useNavigate();
+
+  const cerrarSesion = () => {
+    localStorage.removeItem('token');
+    navigate('/Login');
+  };
 
   const linkClass = (path) =>
     `flex items-center gap-3 px-4 py-2 rounded-md text-white transition ${
@@ -73,10 +79,10 @@ export default function Menu() {
             <FaCog />
             <span>Ajustes</span>
           </Link>
-          <Link to="" className={linkClass('')}>
+          <button onClick={cerrarSesion} className={linkClass('')}>
             <FaSignOutAlt />
             <span>Cerrar Sesión</span>
-          </Link>
+          </button>
         </nav>
       </aside>
       <main
