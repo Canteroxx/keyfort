@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { configurar2FA, verificarCodigo2FA } from '../services/service';
 import icon from '../assets/icon.png';
+import useAuthBoolean from '../services/useAuthBoolean';
 
 export default function PrimerLogin2FA() {
   const [qrUri, setQrUri] = useState('');
@@ -9,7 +10,6 @@ export default function PrimerLogin2FA() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const usuarioId = localStorage.getItem('usuario_id');
-
   useEffect(() => {
     const fetchQR = async () => {
       try {

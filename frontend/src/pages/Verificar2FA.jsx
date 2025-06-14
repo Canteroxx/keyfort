@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { verificarCodigo2FA } from '../services/service';
+import { jwtDecode } from 'jwt-decode';
 import icon from '../assets/icon.png';
+import useAuthBoolean from '../services/useAuthBoolean';
 
 export default function Verificar2FA() {
   const [codigo, setCodigo] = useState('');
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const usuarioId = localStorage.getItem('usuario_id');
-
   const handleVerificar = async () => {
     setError('');
 
@@ -21,8 +22,16 @@ export default function Verificar2FA() {
       const token = await verificarCodigo2FA(usuarioId, codigo);
       localStorage.setItem('token', token);
 	  localStorage.removeItem('usuario_id');
-      navigate('/Dashboard');
-    } catch (err) {
+
+    const payload = jwtDecode(token);
+      if (payload.rol === 'Admin') {
+        navigate('/Dashboard');
+      } else if (payload.rol === 'Usuario') {
+        navigate('/PasswordsUser');
+      } else {
+        navigate('/AccesoDenegado');
+      }
+      } catch (err) {
       setError(err.message);
     }
   };

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import icon from '../assets/icon.png';
 import { loginUsuario } from '../services/service';;
-
 export default function Login() {
   const [correo, setCorreo] = useState('');
   const [contrasena, setContrasena] = useState('');
@@ -12,7 +11,6 @@ export default function Login() {
     try {
       const data = await loginUsuario(correo, contrasena);
       localStorage.setItem('usuario_id', data.usuario);
-      console.log(data)
       if (data.contrasena_temporal) {
         navigate('/PrimerLogin');
       } else if (!data.verificado_2fa){

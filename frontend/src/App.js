@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import MenuAdmin from './components/MenuAdmin'
+import MenUser from './components/MenUser'
 import Ajustes from './pages/admin/Ajustes'
 import Contraseñas from './pages/admin/Contraseñas';
 import Enviar from './pages/admin/Enviar';
@@ -13,6 +14,8 @@ import Solicitar from './pages/Solicitar';
 import PrimerLogin from './pages/PrimerLogin';
 import Conf2FA from './pages/Conf2FA';
 import Verificar2FA from './pages/Verificar2FA';
+import Passwords from './pages/user/Passwords';
+import AccesoDenegado from './pages/AccesoDenegado'
 
 function App() {
   return (
@@ -24,6 +27,7 @@ function App() {
         <Route path="/PrimerLogin" element={<PrimerLogin />}/>
         <Route path="/Conf2FA" element={<Conf2FA />}/>
         <Route path="/Verificar2FA" element={<Verificar2FA />}/>
+        <Route path="/AccesoDenegado" element={<AccesoDenegado />}/>
 
         <Route path="/" element={<MenuAdmin />} >
           <Route path="/Settings" element={<Ajustes />} />
@@ -32,7 +36,11 @@ function App() {
           <Route path="/AccessHistory" element={<Historial />} />
           <Route path="/Send" element={<Enviar />} />
           <Route path="/AddUser" element={<AddUser />} />
-        <Route path="/Dashboard" element={<Dashboard />} />
+          <Route path="/Dashboard" element={<Dashboard />} />
+        </Route>
+
+        <Route path="/" element={<MenUser />} >
+          <Route path="/PasswordsUser" element={<Passwords />} />
         </Route>
       </Routes>
     </div>

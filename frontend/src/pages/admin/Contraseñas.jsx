@@ -1,5 +1,6 @@
 import { React, useState } from 'react'
 import { FaPlus, FaEllipsisV, FaEye, FaEyeSlash} from 'react-icons/fa'
+import useAuth from '../../services/useAuth';
 
 export default function Contraseñas() {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -9,6 +10,7 @@ export default function Contraseñas() {
   const [selectedName, setSelectedName] = useState(null);
   const [contextMenuUser, setContextMenuUser] = useState(null);
   const passwords = [];
+  const usuario = useAuth('Admin');
 
   return (
 	<div className='text-3xl p-10 font-mono w-full text-md font-medium transition-all relative'>

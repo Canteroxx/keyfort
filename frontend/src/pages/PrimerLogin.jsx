@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { enviarPrimerLogin } from '../services/service';;
 import icon from '../assets/icon.png';
+import useAuthBoolean from '../services/useAuthBoolean';
 
 export default function Primer_Login() {
   const [contrasena, setContrasena] = useState('');
@@ -10,7 +11,7 @@ export default function Primer_Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
   const usuarioId = localStorage.getItem('usuario_id');
-
+  const usuario = useAuthBoolean(true, false);
   const handleGuardar = async () => {
     setError('');
 
