@@ -10,6 +10,10 @@ from utils.cambiar_contrasena import cambiar_contrasena
 from utils.auth_token import generar_token, verificar_token
 
 def registrar_rutas(app):
+    @app.route('/health', methods=['GET'])
+    def health_check():
+        return jsonify({'status': 'ok'}), 200
+    
     @app.route('/extraer_usuarios', methods=['GET'])
     @verificar_token
     def obtener_usuarios():
