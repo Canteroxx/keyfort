@@ -10,7 +10,7 @@ from utils.cambiar_contrasena import cambiar_contrasena
 from utils.auth_token import generar_token, verificar_token
 
 def registrar_rutas(app):
-    @app.route('/health', methods=['GET'])
+    @app.route('/', methods=['GET'])
     def health_check():
         return jsonify({'status': 'ok'}), 200
     
