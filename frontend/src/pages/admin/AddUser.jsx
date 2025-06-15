@@ -26,6 +26,13 @@ export default function AddUser() {
     }
   };
 
+  const handleCerrarModal = () => {
+    setShowAddModal(false);
+    setNombre('');
+    setCorreo('');
+    setRol('Usuario');
+};
+
   const handleCrearUsuario = async () => {
     try {
       const data = await crearUsuario(nombre, correo, rol);
@@ -41,7 +48,7 @@ export default function AddUser() {
   };
 
   return (
-    <div className='text-3xl p-10 font-mono w-full text-md font-medium transition-all relative'>
+    <div className='text-3xl p-10 font-mono w-full text-md font-mono transition-all relative'>
       <p className='p-10 text-6xl text-white'>Usuarios</p>
       <nav className='justify-items-end px-5 pb-5'>
         <button onClick={() => { setShowAddModal(true); setContextMenuUser(null); }}
@@ -50,11 +57,11 @@ export default function AddUser() {
           <span>Add User</span>
         </button>
       </nav>
-
-      <section className='p-12 space-y-5 bg-gray-900 border border-white/32 rounded-xl'>
+      <section className='bg-white/5 p-8 rounded-2xl shadow-xl border border-white/10 text-white'>
         {users.map((user, i) => (
-          <article key={i}
-            className='relative flex flex-row justify-between items-center bg-gray-900 text-white p-4 rounded-xl border border-white/32 hover:bg-cyan-800 cursor-pointer flex-1'>
+          <article
+            key={i}
+            className='relative flex flex-row justify-between bg-white/5 p-8 rounded-2xl shadow-xl border border-white/10 text-white mt-5'>
             <p>{user.nombre_usuario}</p>
             <button onClick={() => { setSelectedUser({ name: user.nombre_usuario, email: user.correo }); setShowInfoModal(true); setContextMenuUser(null); }}>
               <FaEllipsisV />
@@ -66,15 +73,14 @@ export default function AddUser() {
       {/* Modal Agregar Usuario */}
       {showAddModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-96 text-black shadow-lg space-y-4">
+          <div className="bg-white rounded-xl p-8 w-[480px] text-black shadow-lg space-y-4">
             <h2 className="text-xl font-semibold">Agregar Usuario</h2>
 
-            <div className="flex flex-col space-y-2">
+            <div className="flex flex-col space-y-2 ">
               <label htmlFor="name" className="text-lg">Nombre:</label>
-              <input id="name" type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} className="border border-black rounded-md px-2 py-1" />
-
+              <input id="name" type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} className="text-lg border border-black rounded-md px-2 py-1" />
               <label htmlFor="email" className="text-lg">Correo:</label>
-              <input id="email" type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} className="border border-black rounded-md px-2 py-1" />
+              <input id="email" type="email" value={correo} onChange={(e) => setCorreo(e.target.value)} className="text-lg border border-black rounded-md px-2 py-1" />
             </div>
 
             <form className="flex justify-around pt-2">
@@ -88,12 +94,14 @@ export default function AddUser() {
               </div>
             </form>
 
-            <button
-              onClick={handleCrearUsuario}
-              className="w-full mt-4 bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800"
-            >
-              Guardar
-            </button>
+              <article className='flex justify-end items-center text-lg w-full space-x-2 px-4'>
+              <button onClick={handleCrearUsuario} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900">
+                Guardar
+              </button>
+                <button onClick={handleCerrarModal} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900">
+                  Cerrar
+                </button>
+            </article>
           </div>
         </div>
       )}
@@ -101,7 +109,7 @@ export default function AddUser() {
       {/* Modal Info Usuario */}
       {showInfoModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 max-w-full">
-          <div className="bg-white rounded-xl p-6 w-96 text-black shadow-lg space-y-4">
+          <div className="bg-white rounded-xl  p-8 w-[480px] text-black shadow-lg space-y-4">
             <h2 className="text-xl font-semibold">Info de {selectedUser?.name}</h2>
 
             <div className="flex flex-col space-y-2">
@@ -138,14 +146,14 @@ export default function AddUser() {
       {/* Modal Editar Usuario */}
       {showEditModal && (
         <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 w-96 text-black shadow-lg space-y-4">
+          <div className="bg-white rounded-xl p-8 w-[480px] text-black shadow-lg space-y-4">
             <h2 className="text-xl font-semibold">Editar: {selectedUser?.name}</h2>
 
-            <div className="text-xl flex flex-col space-y-2">
-              <label htmlFor="nameEdit" className="text-lg">Nombre:</label>
-              <input id="nameEdit" type="text" placeholder={selectedUser?.name} className="border border-black rounded-md px-2 py-1" />
-              <label htmlFor="emailEdit" className="text-lg">Email:</label>
-              <input id="emailEdit" type="text" placeholder={selectedUser?.email} className="border border-black rounded-md px-2 py-1" />
+            <div className="text-base flex flex-col space-y-2">
+              <label htmlFor="nameEdit" className="text-sm">Nombre:</label>
+              <input id="nameEdit" type="text" placeholder={selectedUser?.name} className="text-sm border border-black rounded-md px-2 py-1" />
+              <label htmlFor="emailEdit" className="text-sm">Email:</label>
+              <input id="emailEdit" type="text" placeholder={selectedUser?.email} className="text-sm border border-black rounded-md px-2 py-1" />
             </div>
 
             <form className="flex justify-around pt-2">
@@ -159,13 +167,13 @@ export default function AddUser() {
               </div>
             </form>
 
-            <article className='flex justify-end items-center text-lg w-full space-x-2 px-4'>
+            <article className='flex justify-end items-center text-lg w-full space-x-2 px-4 mt-10'>
               <button onClick={() => setShowEditModal(false)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900">
                 Guardar
               </button>
-              <button onClick={() => setShowEditModal(false)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900">
-                Cerrar
-              </button>
+                <button onClick={() => setShowEditModal(false)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-800">
+                  Cerrar
+                </button>
             </article>
           </div>
         </div>

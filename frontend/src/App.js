@@ -12,6 +12,10 @@ import Historial from "./pages/admin/Historial";
 import AddUser from "./pages/admin/AddUser";
 import Dashboard from "./pages/admin/Dashboard";
 import Passwords from "./pages/user/Passwords";
+import Groups from "./pages/user/Groups"
+import HistoryAcces from "./pages/user/HistoryAccess"
+import SendPassword from "./pages/user/SendPasswords"
+import Settings from "./pages/user/Settings"
 
 import Login from "./pages/Login";
 import Solicitar from "./pages/Solicitar";
@@ -70,6 +74,10 @@ function App() {
         </PrivateRoute>
       }>
         <Route path="PasswordsUser" element={<Passwords />} />
+        <Route path="Groups" element={<Groups />} />
+        <Route path="UserAccesHistory" element={<HistoryAcces />} />
+        <Route path="UserSend" element={<SendPassword />} />
+        <Route path="UserSettings" element={<Settings />} />
       </Route>
 
       <Route path="*" element={<RutaNoEncontrada />} />

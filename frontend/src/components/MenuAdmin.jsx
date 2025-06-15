@@ -50,7 +50,7 @@ export default function Menu() {
         <div className="mb-6 text-center">
           <img src={icon} alt="KeyFort Logo" className="w-40 h-40 mx-auto mb-2"/>
         </div>
-		<nav className={`flex flex-col w-full space-y-2 text-md font-medium transition-all ${isOpen ? 'block' : 'hidden'}`}>
+		<nav className={`flex flex-col w-full space-y-2 text-lg font-medium transition-all ${isOpen ? 'block' : 'hidden'}`}>
           <Link to="/Dashboard" className={linkClass('/Dashboard')}>
             <FaDesktop />
             <span>Dashboard</span>

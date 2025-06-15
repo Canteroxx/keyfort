@@ -50,8 +50,8 @@ export default function MenUser() {
         <div className="mb-6 text-center">
           <img src={icon} alt="KeyFort Logo" className="w-40 h-40 mx-auto mb-2"/>
         </div>
-		<nav className={`flex flex-col w-full space-y-2 text-md font-medium transition-all ${isOpen ? 'block' : 'hidden'}`}>
-          <Link to="/PasswordsUser" className={linkClass('/Passwords')}>
+		<nav className={`flex flex-col w-full space-y-2 text-lg font-medium transition-all ${isOpen ? 'block' : 'hidden'}`}>
+          <Link to="/PasswordsUser" className={linkClass('/PasswordsUser')}>
             <FaKey />
             <span>Contraseñas</span>
           </Link>
@@ -59,15 +59,15 @@ export default function MenUser() {
             <FaUsers />
             <span>Grupos</span>
           </Link>
-          <Link to="/Send" className={linkClass('/Send')}>
+          <Link to="/UserSend" className={linkClass('/UserSend')}>
             <FaPaperPlane />
             <span>Enviar Contraseña</span>
           </Link>
-            <Link to="/UserAccessHistory" className={linkClass('/AccessHistory')}>
+            <Link to="/UserAccesHistory" className={linkClass('/UserAccesHistory')}>
             <FaClock />
             <span>Historial de acceso</span>
           </Link>
-          <Link to="/Settings" className={linkClass('/Settings')}>
+          <Link to="/UserSettings" className={linkClass('/UserSettings')}>
             <FaCog />
             <span>Ajustes</span>
           </Link>

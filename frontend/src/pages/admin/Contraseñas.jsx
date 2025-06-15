@@ -21,42 +21,34 @@ export default function Contraseñas() {
 		</button>
 	  </nav>
 
-	  <section className='p-12 space-y-5 bg-gray-900 border border-white/32 rounded-xl'>
-		{passwords.map((user, i) => (
-		  <article
-			className='relative flex flex-row justify-between items-center bg-gray-900 text-white p-4 rounded-xl border border-white/32 hover:bg-cyan-800 cursor-pointer flex-1'>
-			<p>{user.name}</p>
-			<button key={i} onClick={() => {setSelectedName(user);setShowInfoModal(true);setContextMenuUser(null);}}>
-			  <FaEllipsisV />
-			</button>
-		
-		  </article>
-		))}
-	  </section>
 
 	  {showAddModal && (
 		<div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
 		  <div className="bg-white rounded-xl p-6 w-96 text-black shadow-lg space-y-4">
 			<h2 className="text-xl font-semibold">Agregar Contraseña</h2>
 
-			<div className="flex flex-col space-y-2">
+			<div className="text-lg flex flex-col space-y-2">
 			  <label htmlFor="name" className="text-lg">Nombre:</label>
-			  <input id="name" type="text" className="border border-black rounded-md px-2 py-1" />
+			  <input id="name" type="text" className="border border-black rounded-md px-2 py-1 text-lg" />
 			  <label htmlFor="name" className="text-lg">Usuario:</label>
-			  <input id="name" type="text" className="border border-black rounded-md px-2 py-1" />
+			  <input id="name" type="text" className="border border-black rounded-md px-2 py-1 text-lg" />
 			  <label htmlFor="password" className="text-lg">Contraseña:</label>
 			  <div className="relative">
-        		<input id="password" type={showPassword ? "text" : "password"} placeholder="Password" className="border border-black rounded-md px-2 py-1 pr-10 w-full text-black"/>
+        		<input id="password" type={showPassword ? "text" : "password"} placeholder="Password" className="border border-black rounded-md text-lg px-2 py-1 pr-10 w-full text-black"/>
         		<span onClick={() => setShowPassword(!showPassword)}
           		className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-600">
           		{showPassword ? <FaEyeSlash /> : <FaEye />}
         		</span>
       		  </div>
 			  </div>
-				<button onClick={() => setShowAddModal(false)}
-			  className="w-full mt-4 bg-cyan-700 text-white px-4 py-2 rounded hover:bg-cyan-800">
-			  Guardar
-			</button>
+			<article className='flex justify-end items-center text-lg w-full space-x-2 px-4'>
+              <button onClick={() => setShowEditModal(false)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900">
+                Guardar
+              </button>
+                <button onClick={() =>  setShowAddModal(false)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-800">
+                  Cerrar
+                </button>
+            </article>
 		  </div>
 		</div>
 	  )}
@@ -96,8 +88,6 @@ export default function Contraseñas() {
 		  </div>
 		</div>
 	  )}
-
-
 
 	  {showEditModal && (
 		<div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">

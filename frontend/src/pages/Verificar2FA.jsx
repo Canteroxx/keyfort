@@ -40,12 +40,11 @@ export default function Verificar2FA() {
 
 
   return (
-    <div className='flex justify-center min-h-screen bg-gray-900'>
-      <div className="p-4 text-white">
-        <div className="mb-6 text-center">
-          <img src={icon} alt="KeyFort Logo" className="w-80 h-80 mx-auto mb-2" />
-        </div>
-        <article className='bg-gray-900 p-12 rounded-md border w-[600px] max-w-full transition-all relative'>
+    <div className='flex justify-center items-center min-h-screen bg-gray-900'>
+      <div className="absolute top-8">
+        <img src={icon} alt="KeyFort Logo" className="w-64 h-64 mx-auto mb-4" />
+      </div>
+        <article className='bg-white/5 p-8 rounded-2xl shadow-xl border border-white/10 w-[640px] text-white mt-24'>
           <h2 className="text-center text-xl font-semibold mb-4">Ingresa el Código de 6 Dígitos</h2>
 
           <div className="text-xl flex flex-col space-y-2">
@@ -73,6 +72,5 @@ export default function Verificar2FA() {
           </div>
         </article>
       </div>
-    </div>
   );
 }
