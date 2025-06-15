@@ -1,5 +1,3 @@
-import React, { useEffect } from 'react'
-
 export default function () {
   return (
     <div className='text-4xl p-10 font-mono '>

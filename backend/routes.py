@@ -11,6 +11,7 @@ from utils.auth_token import generar_token, verificar_token
 
 def registrar_rutas(app):
     @app.route('/extraer_usuarios', methods=['GET'])
+    @verificar_token
     def obtener_usuarios():
         usuarios = Usuario.query.all()
 
@@ -25,6 +26,7 @@ def registrar_rutas(app):
 
 
     @app.route('/crear_usuario', methods=['POST'])
+    @verificar_token
     def crear_usuario():
         data = request.get_json()
 
@@ -150,7 +152,7 @@ def registrar_rutas(app):
                 usuario.verificado_2fa = True
                 db.session.commit()
 
-            token = generar_token(usuario.id, usuario.rol, usuario.contrasena_temporal, usuario.verificado_2fa)
+            token = generar_token(usuario.id, usuario.rol)
 
 
             return jsonify({

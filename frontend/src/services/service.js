@@ -1,19 +1,30 @@
 const backendUrl = process.env.REACT_APP_BACKEND_URL;
 
+function getAuthHeaders(extraHeaders = {}) {
+  const token = localStorage.getItem("token");
+  return {
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${token}`,
+    ...extraHeaders
+  };
+}
+
 export async function obtenerUsuarios() {
-  const response = await fetch(`${backendUrl}/extraer_usuarios`);
+  const response = await fetch(`${backendUrl}/extraer_usuarios`, {
+    headers: getAuthHeaders()
+  });
+
   if (!response.ok) {
     throw new Error('Error al obtener los usuarios');
   }
+
   return await response.json();
 }
 
 export async function crearUsuario(nombre_usuario, correo, rol) {
   const respuesta = await fetch(`${backendUrl}/crear_usuario`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: getAuthHeaders(),
     body: JSON.stringify({
       nombre_usuario,
       correo,
