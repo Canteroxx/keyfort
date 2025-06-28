@@ -83,7 +83,7 @@ return (
             />
             <div className="text-base text-center text-gray-300 mt-2">
               <p className="font-semibold mb-1">¿No puedes escanear el código?</p>
-              <p className="text-sm">Ingresa esta clave manualmente:</p>
+              <p className="text-sm">Ingresa esta clave manualmente (basada en tiempo):</p>
               <p className="bg-gray-800 px-3 py-2 mt-2 rounded-md font-mono tracking-wider text-2xl text-white border border-white/10">
                 {codigoSecreto}
               </p>

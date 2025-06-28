@@ -13,7 +13,7 @@ export default function Contraseñas() {
   return (
 	<div className='text-3xl p-10 font-mono w-full text-md font-medium transition-all relative'>
 	  <p className='p-10 text-6xl text-white'>Contraseñas</p>
-	  <nav className='justify-items-end px-5 pb-5'>
+	  {/*<nav className='justify-items-end px-5 pb-5'>
 		<button onClick={() => {setShowAddModal(true); setContextMenuUser(null);}}
 		  className="flex flex-row items-center gap-3 px-4 py-2 rounded-md text-white text-xl bg-cyan-700 border border-cyan-300 hover:bg-cyan-800">
 		  <FaPlus />
@@ -109,7 +109,7 @@ export default function Contraseñas() {
             </article>
 		  </div>
 		</div>
-	  )}
+	  )}*/}
 
 	</div>
   )

@@ -11,7 +11,7 @@ export default function Solicitar() {
         <article className='bg-white/5 p-8 rounded-2xl shadow-xl border border-white/10 w-[640px] text-white mt-20'>
           <h2 className="text-center text-xl font-semibold mb-4">Olvidaste tu Contraseña</h2>
             <div className="text-xl flex flex-col space-y-2">
-              <label htmlFor="nameEdit" className="text-lg">En Proceso ...</label>
+              <label htmlFor="nameEdit" className="text-lg">En Desarrollo ...</label>
             </div>
             <div className="flex justify-end">
               <Link to="/Login">
