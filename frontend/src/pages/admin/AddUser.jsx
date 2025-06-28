@@ -49,19 +49,19 @@ export default function AddUser() {
 
   return (
     <div className='text-3xl p-10 font-mono w-full text-md font-mono transition-all relative'>
-      <p className='p-10 text-6xl text-white'>Usuarios</p>
-      <nav className='justify-items-end px-5 pb-5'>
+      <nav className='flex flex-row items-end justify-between px-5 pb-5'>
+      <p className='p-10 text-5xl text-white'>Usuarios</p>
         <button onClick={() => { setShowAddModal(true); setContextMenuUser(null); }}
           className="flex flex-row items-center gap-3 px-4 py-2 rounded-md text-white text-xl bg-cyan-700 border border-cyan-300 hover:bg-cyan-800">
           <FaPlus />
           <span>Add User</span>
         </button>
       </nav>
-      <section className='bg-white/5 p-8 rounded-2xl shadow-xl border border-white/10 text-white'>
+      <section className='text-3xl'>
         {users.map((user, i) => (
           <article
             key={i}
-            className='relative flex flex-row justify-between bg-white/5 p-8 rounded-2xl shadow-xl border border-white/10 text-white mt-5'>
+            className='relative flex flex-row justify-between bg-white/5 p-4 rounded-2xl shadow-xl border border-white/10 text-white'>
             <p>{user.nombre_usuario}</p>
             <button onClick={() => { setSelectedUser({ name: user.nombre_usuario, email: user.correo }); setShowInfoModal(true); setContextMenuUser(null); }}>
               <FaEllipsisV />

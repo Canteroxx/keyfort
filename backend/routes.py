@@ -152,7 +152,7 @@ def registrar_rutas(app):
                 usuario.verificado_2fa = True
                 db.session.commit()
 
-            token = generar_token(usuario.id, usuario.rol)
+            token = generar_token(usuario.id, usuario.nombre_usuario, usuario.correo, usuario.rol)
 
 
             return jsonify({
