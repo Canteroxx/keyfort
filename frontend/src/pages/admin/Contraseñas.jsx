@@ -8,19 +8,33 @@ export default function Contraseñas() {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedName, setSelectedName] = useState(null);
   const [contextMenuUser, setContextMenuUser] = useState(null);
-  const passwords = [];
+  const [passwords, setPasswords] = useState([]);
+
+  // poni aqui la funcion pa crear contraseñas
 
   return (
 	<div className='text-3xl p-10 font-mono w-full text-md font-medium transition-all relative'>
-	  <p className='p-10 text-6xl text-white'>Contraseñas</p>
-	  {/*<nav className='justify-items-end px-5 pb-5'>
+	  <p className='p-10 text-5xl text-white'>Contraseñas</p>
+	  <nav className='justify-items-end px-5 pb-5'>
 		<button onClick={() => {setShowAddModal(true); setContextMenuUser(null);}}
 		  className="flex flex-row items-center gap-3 px-4 py-2 rounded-md text-white text-xl bg-cyan-700 border border-cyan-300 hover:bg-cyan-800">
 		  <FaPlus />
 		  <span>Add Password</span>
 		</button>
 	  </nav>
-
+		{/*<section className="mt-4 space-y-4"> 
+		{passwords.map((item, index) => (
+			<div key={index} className="bg-white/10 text-white border border-white/20 rounded-xl p-4 flex justify-between items-center">
+			<div>
+				<p className="text-xl">{item.servicio}</p>
+				<p className="text-sm text-white/70">{item.usuario}</p>
+			</div>
+			<button onClick={() => {setSelectedName(item);setShowInfoModal(true);}} className="text-white">
+				<FaEllipsisV />
+			</button>
+			</div>
+		))}
+		</section>*/}
 
 	  {showAddModal && (
 		<div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
@@ -28,7 +42,7 @@ export default function Contraseñas() {
 			<h2 className="text-xl font-semibold">Agregar Contraseña</h2>
 
 			<div className="text-lg flex flex-col space-y-2">
-			  <label htmlFor="name" className="text-lg">Nombre:</label>
+			  <label htmlFor="name" className="text-lg">Servicio:</label>
 			  <input id="name" type="text" className="border border-black rounded-md px-2 py-1 text-lg" />
 			  <label htmlFor="name" className="text-lg">Usuario:</label>
 			  <input id="name" type="text" className="border border-black rounded-md px-2 py-1 text-lg" />
@@ -109,7 +123,7 @@ export default function Contraseñas() {
             </article>
 		  </div>
 		</div>
-	  )}*/}
+	  )}
 
 	</div>
   )
