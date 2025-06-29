@@ -223,7 +223,7 @@ export default function Contraseñas() {
                       }
                     }}
                   >
-                    {isSelected && showDeleteForm ? <img src={ba} alt="ba icon" className="w-7 h-7 invert"/> : <img src={bc} alt="bc icon" className="w-7 h-7 invert"/>}
+                    {isSelected && showDeleteForm ? <img src={ba} alt="ba icon" className="w-6 h-6 invert"/> : <img src={bc} alt="bc icon" className="w-6 h-6 invert"/>}
                   </button>
                 </div>
               </div>
@@ -232,7 +232,7 @@ export default function Contraseñas() {
                 <div className="flex flex-col space-y-2 text-lg">
                   <input
                     type="password"
-                    placeholder="Contraseña de Login"
+                    placeholder="Contraseña Login"
                     value={passwordLogin}
                     onChange={(e) => setPasswordLogin(e.target.value)}
                     className="border border-white bg-transparent text-white rounded-md px-3 py-2"
