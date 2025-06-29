@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaPlus, FaEye, FaEyeSlash, FaCopy } from "react-icons/fa";
+import ba from '../../assets/ba.png';
+import bc from '../../assets/bc.png';
 import {
   crearCredencial,
   obtenerMisCredenciales,
@@ -61,9 +63,12 @@ export default function Contraseñas() {
   }, [mostrandoCredencial]);
 
   const handleGuardarCredencial = async () => {
+    if (!passwordLogin || !servicio || !usuarioServicio || !contrasenaServicio) {
+      alert("Por favor completa todos los campos obligatorios");
+      return;
+    }
     try {
       const datosToken = obtenerDatosToken();
-      if (!datosToken) throw new Error("Token inválido o expirado");
       const id = datosToken.usuario_id;
 
       await crearCredencial(
@@ -73,6 +78,7 @@ export default function Contraseñas() {
         contrasenaServicio,
         passwordLogin
       );
+      alert("Contraseña creada exitosamente");
       setShowAddModal(false);
       setServicio("");
       setUsuarioServicio("");
@@ -80,7 +86,7 @@ export default function Contraseñas() {
       setPasswordLogin("");
       await cargarCredenciales();
     } catch (err) {
-      alert("Error al guardar credencial: " + err.message);
+      alert("Error al guardar contraseña: " + err.message);
     }
   };
 
@@ -91,7 +97,6 @@ export default function Contraseñas() {
     }
     try {
       const datosToken = obtenerDatosToken();
-      if (!datosToken) throw new Error("Token inválido o expirado");
       const usuario_id = datosToken.usuario_id;
 
       const response = await verCredencial({
@@ -108,7 +113,7 @@ export default function Contraseñas() {
       setMostrandoCredencial(true);
       setShowDeleteForm(false);
     } catch (error) {
-      alert("Contraseña o código 2FA incorrectos");
+      alert("Error al mostrar contraseña: " + error.message);
     }
   };
 
@@ -119,7 +124,6 @@ export default function Contraseñas() {
     }
     try {
       const datosToken = obtenerDatosToken();
-      if (!datosToken) throw new Error("Token inválido o expirado");
       const usuario_id = datosToken.usuario_id;
 
       await eliminarCredencial({
@@ -129,15 +133,15 @@ export default function Contraseñas() {
         codigo_2fa: codigo2FA,
       });
 
-      alert("Credencial eliminada exitosamente");
+      alert("Contraseña eliminada exitosamente");
       setShowDeleteForm(false);
       setMostrandoCredencial(false);
       setPasswordLogin("");
       setCodigo2FA("");
       setSelectedName(null);
       await cargarCredenciales();
-    } catch (err) {
-      alert("Error al eliminar credencial: " + err.message);
+    } catch (error) {
+      alert("Error al eliminar contraseña: " + error.message);
     }
   };
 
@@ -157,6 +161,9 @@ export default function Contraseñas() {
             setMostrandoCredencial(false);
             setPasswordLogin("");
             setCodigo2FA("");
+            setServicio("");
+            setUsuarioServicio("");
+            setContrasenaServicio("");
             setSelectedName(null);
             setShowDeleteForm(false);
           }}
@@ -216,7 +223,7 @@ export default function Contraseñas() {
                       }
                     }}
                   >
-                    🗑️
+                    {isSelected && showDeleteForm ? <img src={ba} alt="ba icon" className="w-7 h-7 invert"/> : <img src={bc} alt="bc icon" className="w-7 h-7 invert"/>}
                   </button>
                 </div>
               </div>
@@ -244,7 +251,7 @@ export default function Contraseñas() {
                         onClick={handleVerCredencial}
                         className="bg-cyan-800 text-white px-4 py-2 rounded hover:bg-cyan-900"
                       >
-                        Ver credencial
+                        Ver contraseña
                       </button>
                     </div>
                   ) : (
@@ -253,7 +260,7 @@ export default function Contraseñas() {
                         onClick={handleEliminarCredencial}
                         className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
                       >
-                        Eliminar
+                        Eliminar contraseña
                       </button>
                     </div>
                   )}
