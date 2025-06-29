@@ -3,10 +3,12 @@ from datetime import datetime, timedelta
 from flask import request, jsonify, g, current_app
 from functools import wraps
 
-def generar_token(usuario_id, usuario_rol, duracion_horas=1):
+def generar_token(usuario_id, usuario_nombre, usuario_correo, usuario_rol, duracion_horas=1):
     expiracion = datetime.utcnow() + timedelta(hours=duracion_horas)
     payload = {
         'usuario_id': usuario_id,
+        'nombre': usuario_nombre,
+        'correo': usuario_correo,
         'rol': usuario_rol,
         'exp': expiracion
     }
