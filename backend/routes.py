@@ -1,9 +1,10 @@
 from flask import request, jsonify
 from sqlalchemy.exc import SQLAlchemyError
+from cryptography.fernet import InvalidToken
 from base.db import db
 from base.models import Usuario, Credencial, Grupo, RegistroAcceso, CredencialCompartidaUsuario
 from utils.contrasena import generar_contrasena, hashear_contrasena, checkear_contrasena
-from utils.cifrado_aes import generar_clave_usuario_cifrada
+from utils.cifrado_aes import generar_clave_usuario_cifrada, obtener_fernet_usuario
 from utils.twofa import generar_clave_2fa, generar_uri_2fa, verificar_codigo_2fa
 from utils.correos import enviar_correo_contrasena
 from utils.cambiar_contrasena import cambiar_contrasena
@@ -161,3 +162,132 @@ def registrar_rutas(app):
             }), 200
         else:
             return jsonify({'error': 'Código incorrecto'}), 401
+        
+    @app.route('/crear_credencial', methods=['POST'])
+    @verificar_token
+    def crear_credencial():
+        data = request.get_json()
+        
+        campos_requeridos = ('usuario_id', 'servicio', 'usuario', 'contrasena_usuario', 'contrasena')
+        if not all(k in data for k in campos_requeridos):
+            return jsonify({'error': 'Faltan campos requeridos'}), 400
+
+        usuario = Usuario.query.get(data['usuario_id'])
+        if not usuario:
+            return jsonify({'error': 'Usuario no encontrado'}), 404
+
+        try:
+            fernet = obtener_fernet_usuario(usuario.clave_cifrada, usuario.salt, data['contrasena'])
+
+            usuario_cifrado = fernet.encrypt(data['usuario'].encode()).decode()
+            contrasena_cifrada = fernet.encrypt(data['contrasena_usuario'].encode()).decode()
+
+            nueva_credencial = Credencial(
+                servicio=data['servicio'],
+                usuario_cifrado=usuario_cifrado,
+                contrasena_cifrada=contrasena_cifrada,
+                duenio_id=usuario.id
+            )
+
+            db.session.add(nueva_credencial)
+            db.session.commit()
+
+            return jsonify({'mensaje': 'Credencial creada exitosamente'}), 201
+
+        except InvalidToken:
+            db.session.rollback()
+            return jsonify({'error': 'Contraseña Login incorrecta'}), 401
+
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': 'Error al crear la credencial', 'detalle': str(e)}), 500
+
+        
+    @app.route('/mis_credenciales', methods=['GET'])
+    @verificar_token
+    def obtener_lista_servicios():
+        usuario_id = request.args.get('usuario_id')
+
+        if not usuario_id:
+            return jsonify({'error': 'Falta el usuario_id'}), 400
+
+        usuario = Usuario.query.get(usuario_id)
+        if not usuario:
+            return jsonify({'error': 'Usuario no encontrado'}), 404
+
+        credenciales = Credencial.query.filter_by(duenio_id=usuario.id).all()
+
+        lista = [{
+            'id': c.id,
+            'servicio': c.servicio,
+        } for c in credenciales]
+
+        return jsonify(lista), 200
+    
+    @app.route('/ver_credencial', methods=['POST'])
+    @verificar_token
+    def ver_credencial_completa():
+        data = request.get_json()
+
+        campos = ('usuario_id', 'credencial_id', 'contrasena_usuario', 'codigo_2fa')
+        if not all(k in data for k in campos):
+            return jsonify({'error': 'Faltan datos requeridos'}), 400
+
+        usuario = Usuario.query.get(data['usuario_id'])
+        if not usuario:
+            return jsonify({'error': 'Usuario no encontrado'}), 404
+
+        credencial = Credencial.query.get(data['credencial_id'])
+        if not credencial or credencial.duenio_id != usuario.id:
+            return jsonify({'error': 'Credencial no encontrada o no pertenece al usuario'}), 403
+
+        if not verificar_codigo_2fa(usuario.clave_2fa, data['codigo_2fa']):
+            return jsonify({'error': 'Código 2FA incorrecto'}), 401
+
+        try:
+            fernet = obtener_fernet_usuario(usuario.clave_cifrada, usuario.salt, data['contrasena_usuario'])
+
+            usuario_descifrado = fernet.decrypt(credencial.usuario_cifrado.encode()).decode()
+            contrasena_descifrada = fernet.decrypt(credencial.contrasena_cifrada.encode()).decode()
+
+            return jsonify({
+                'usuario': usuario_descifrado,
+                'contrasena': contrasena_descifrada
+            }), 200
+
+        except InvalidToken:
+            return jsonify({'error': 'Contraseña Login incorrecta'}), 401
+
+        except Exception as e:
+            return jsonify({'error': 'Error al descifrar', 'detalle': str(e)}), 500
+
+    @app.route('/eliminar_credencial', methods=['DELETE'])
+    @verificar_token
+    def eliminar_credencial():
+        data = request.get_json()
+
+        campos = ('usuario_id', 'credencial_id', 'contrasena_usuario', 'codigo_2fa')
+        if not all(k in data for k in campos):
+            return jsonify({'error': 'Faltan datos requeridos'}), 400
+
+        usuario = Usuario.query.get(data['usuario_id'])
+        if not usuario:
+            return jsonify({'error': 'Usuario no encontrado'}), 404
+
+        if not checkear_contrasena(usuario.contrasena_hash, data['contrasena_usuario']):
+            return jsonify({'error': 'Contraseña Login incorrecta'}), 401
+
+        if not verificar_codigo_2fa(usuario.clave_2fa, data['codigo_2fa']):
+            return jsonify({'error': 'Código 2FA incorrecto'}), 401
+
+        credencial = Credencial.query.get(data['credencial_id'])
+        if not credencial or credencial.duenio_id != usuario.id:
+            return jsonify({'error': 'Credencial no encontrada o no pertenece al usuario'}), 403
+
+        try:
+            db.session.delete(credencial)
+            db.session.commit()
+            return jsonify({'mensaje': 'Credencial eliminada exitosamente'}), 200
+        except SQLAlchemyError as e:
+            db.session.rollback()
+            return jsonify({'error': 'Error al eliminar la credencial', 'detalle': str(e)}), 500

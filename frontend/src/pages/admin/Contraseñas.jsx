@@ -1,130 +1,393 @@
-import { React, useState } from 'react'
-import { FaPlus, FaEllipsisV, FaEye, FaEyeSlash} from 'react-icons/fa'
+import React, { useState, useEffect, useRef } from "react";
+import { FaPlus, FaEye, FaEyeSlash, FaCopy } from "react-icons/fa";
+import {
+  crearCredencial,
+  obtenerMisCredenciales,
+  verCredencial,
+  eliminarCredencial,
+} from "../../services/service";
+import { obtenerDatosToken } from "../../services/auth";
 
 export default function Contraseñas() {
+  const [servicio, setServicio] = useState("");
+  const [usuarioServicio, setUsuarioServicio] = useState("");
+  const [contrasenaServicio, setContrasenaServicio] = useState("");
+  const [passwordLogin, setPasswordLogin] = useState("");
+  const [codigo2FA, setCodigo2FA] = useState("");
+  const [mostrandoCredencial, setMostrandoCredencial] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [showInfoModal, setShowInfoModal] = useState(false);
+  const [showPassword1, setShowPassword1] = useState(false);
+  const [showPassword2, setShowPassword2] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [selectedName, setSelectedName] = useState(null);
-  const [contextMenuUser, setContextMenuUser] = useState(null);
   const [passwords, setPasswords] = useState([]);
+  const [showDeleteForm, setShowDeleteForm] = useState(false);
+  const [copiedField, setCopiedField] = useState(null);
+  const timerRef = useRef(null);
 
-  // poni aqui la funcion pa crear contraseñas
+  const cargarCredenciales = async () => {
+    try {
+      const datosToken = obtenerDatosToken();
+      if (!datosToken) throw new Error("Token inválido o expirado");
+      const usuario_id = datosToken.usuario_id;
+
+      const res = await obtenerMisCredenciales(usuario_id);
+      setPasswords(res);
+    } catch (err) {
+      alert("Error al cargar credenciales: " + err.message);
+    }
+  };
+
+  useEffect(() => {
+    cargarCredenciales();
+  }, []);
+
+  useEffect(() => {
+    if (mostrandoCredencial) {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => {
+        setMostrandoCredencial(false);
+        setSelectedName(null);
+        setPasswordLogin("");
+        setCodigo2FA("");
+        setShowPassword(false);
+        setShowDeleteForm(false);
+        setTimeout(() => {
+          alert("La visualización de la credencial expiró por seguridad.");
+        }, 100);
+      }, 30000);
+      return () => clearTimeout(timerRef.current);
+    }
+  }, [mostrandoCredencial]);
+
+  const handleGuardarCredencial = async () => {
+    try {
+      const datosToken = obtenerDatosToken();
+      if (!datosToken) throw new Error("Token inválido o expirado");
+      const id = datosToken.usuario_id;
+
+      await crearCredencial(
+        id,
+        servicio,
+        usuarioServicio,
+        contrasenaServicio,
+        passwordLogin
+      );
+      setShowAddModal(false);
+      setServicio("");
+      setUsuarioServicio("");
+      setContrasenaServicio("");
+      setPasswordLogin("");
+      await cargarCredenciales();
+    } catch (err) {
+      alert("Error al guardar credencial: " + err.message);
+    }
+  };
+
+  const handleVerCredencial = async () => {
+    if (!passwordLogin || !codigo2FA) {
+      alert("Por favor completa todos los campos obligatorios");
+      return;
+    }
+    try {
+      const datosToken = obtenerDatosToken();
+      if (!datosToken) throw new Error("Token inválido o expirado");
+      const usuario_id = datosToken.usuario_id;
+
+      const response = await verCredencial({
+        usuario_id,
+        credencial_id: selectedName.id,
+        contrasena_usuario: passwordLogin,
+        codigo_2fa: codigo2FA,
+      });
+      setSelectedName({
+        ...selectedName,
+        user: response.usuario,
+        password: response.contrasena,
+      });
+      setMostrandoCredencial(true);
+      setShowDeleteForm(false);
+    } catch (error) {
+      alert("Contraseña o código 2FA incorrectos");
+    }
+  };
+
+  const handleEliminarCredencial = async () => {
+    if (!passwordLogin || !codigo2FA) {
+      alert("Por favor completa todos los campos obligatorios");
+      return;
+    }
+    try {
+      const datosToken = obtenerDatosToken();
+      if (!datosToken) throw new Error("Token inválido o expirado");
+      const usuario_id = datosToken.usuario_id;
+
+      await eliminarCredencial({
+        usuario_id,
+        credencial_id: selectedName.id,
+        contrasena_usuario: passwordLogin,
+        codigo_2fa: codigo2FA,
+      });
+
+      alert("Credencial eliminada exitosamente");
+      setShowDeleteForm(false);
+      setMostrandoCredencial(false);
+      setPasswordLogin("");
+      setCodigo2FA("");
+      setSelectedName(null);
+      await cargarCredenciales();
+    } catch (err) {
+      alert("Error al eliminar credencial: " + err.message);
+    }
+  };
+
+  const copiarAlPortapapeles = (text, campo) => {
+    navigator.clipboard.writeText(text);
+    setCopiedField(campo);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
 
   return (
-	<div className='text-3xl p-10 font-mono w-full text-md font-medium transition-all relative'>
-	  <p className='p-10 text-5xl text-white'>Contraseñas</p>
-	  <nav className='justify-items-end px-5 pb-5'>
-		<button onClick={() => {setShowAddModal(true); setContextMenuUser(null);}}
-		  className="flex flex-row items-center gap-3 px-4 py-2 rounded-md text-white text-xl bg-cyan-700 border border-cyan-300 hover:bg-cyan-800">
-		  <FaPlus />
-		  <span>Add Password</span>
-		</button>
-	  </nav>
-		{/*<section className="mt-4 space-y-4"> 
-		{passwords.map((item, index) => (
-			<div key={index} className="bg-white/10 text-white border border-white/20 rounded-xl p-4 flex justify-between items-center">
-			<div>
-				<p className="text-xl">{item.servicio}</p>
-				<p className="text-sm text-white/70">{item.usuario}</p>
-			</div>
-			<button onClick={() => {setSelectedName(item);setShowInfoModal(true);}} className="text-white">
-				<FaEllipsisV />
-			</button>
-			</div>
-		))}
-		</section>*/}
+    <div className="text-3xl p-10 font-mono w-full text-md font-medium transition-all relative">
+      <p className="p-10 text-5xl text-white">Contraseñas</p>
+      <nav className="justify-items-end px-5 pb-5">
+        <button
+          onClick={() => {
+            setShowAddModal(true);
+            setMostrandoCredencial(false);
+            setPasswordLogin("");
+            setCodigo2FA("");
+            setSelectedName(null);
+            setShowDeleteForm(false);
+          }}
+          className="flex flex-row items-center gap-3 px-4 py-2 rounded-md text-white text-xl bg-cyan-700 border border-cyan-300 hover:bg-cyan-800"
+        >
+          <FaPlus />
+          <span>Add Password</span>
+        </button>
+      </nav>
 
-	  {showAddModal && (
-		<div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
-		  <div className="bg-white rounded-xl p-6 w-96 text-black shadow-lg space-y-4">
-			<h2 className="text-xl font-semibold">Agregar Contraseña</h2>
+      <section className="mt-4 space-y-4">
+        {passwords.map((item, index) => {
+          const isSelected = selectedName?.id === item.id;
+          return (
+            <div
+              key={index}
+              className="bg-white/10 text-white border border-white/20 rounded-xl p-4 flex flex-col gap-3"
+            >
+              <div className="flex justify-between items-center">
+                <p className="text-xl">Servicio: {item.servicio}</p>
+                <div className="flex gap-2">
+                  <button
+                    className="text-white text-2xl"
+                    onClick={() => {
+                      if (isSelected && !showDeleteForm) {
+                        setSelectedName(null);
+                        setMostrandoCredencial(false);
+                        setPasswordLogin("");
+                        setCodigo2FA("");
+                        setShowDeleteForm(false);
+                      } else {
+                        setSelectedName(item);
+                        setMostrandoCredencial(false);
+                        setPasswordLogin("");
+                        setCodigo2FA("");
+                        setShowPassword(false);
+                        setShowDeleteForm(false);
+                      }
+                    }}
+                  >
+                    {isSelected && !showDeleteForm ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                  <button
+                    className="text-600 text-2xl"
+                    title="Eliminar credencial"
+                    onClick={() => {
+                      if (isSelected && showDeleteForm) {
+                        setSelectedName(null);
+                        setShowDeleteForm(false);
+                      } else {
+                        setSelectedName(item);
+                        setMostrandoCredencial(false);
+                        setShowDeleteForm(true);
+                        setPasswordLogin("");
+                        setCodigo2FA("");
+                        setShowPassword(false);
+                      }
+                    }}
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </div>
 
-			<div className="text-lg flex flex-col space-y-2">
-			  <label htmlFor="name" className="text-lg">Servicio:</label>
-			  <input id="name" type="text" className="border border-black rounded-md px-2 py-1 text-lg" />
-			  <label htmlFor="name" className="text-lg">Usuario:</label>
-			  <input id="name" type="text" className="border border-black rounded-md px-2 py-1 text-lg" />
-			  <label htmlFor="password" className="text-lg">Contraseña:</label>
-			  <div className="relative">
-        		<input id="password" type={showPassword ? "text" : "password"} placeholder="Password" className="border border-black rounded-md text-lg px-2 py-1 pr-10 w-full text-black"/>
-        		<span onClick={() => setShowPassword(!showPassword)}
-          		className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-600">
-          		{showPassword ? <FaEyeSlash /> : <FaEye />}
-        		</span>
-      		  </div>
-			  </div>
-			<article className='flex justify-end items-center text-lg w-full space-x-2 px-4'>
-              <button onClick={() => setShowEditModal(false)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900">
+              {isSelected && !mostrandoCredencial && (
+                <div className="flex flex-col space-y-2 text-lg">
+                  <input
+                    type="password"
+                    placeholder="Contraseña de Login"
+                    value={passwordLogin}
+                    onChange={(e) => setPasswordLogin(e.target.value)}
+                    className="border border-white bg-transparent text-white rounded-md px-3 py-2"
+                  />
+                  <input
+                    type="text"
+                    placeholder="Código 2FA"
+                    value={codigo2FA}
+                    onChange={(e) => setCodigo2FA(e.target.value)}
+                    className="border border-white bg-transparent text-white rounded-md px-3 py-2"
+                  />
+
+                  {!showDeleteForm ? (
+                    <div className="flex gap-2 justify-end">
+                      <button
+                        onClick={handleVerCredencial}
+                        className="bg-cyan-800 text-white px-4 py-2 rounded hover:bg-cyan-900"
+                      >
+                        Ver credencial
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex gap-2 justify-end">
+                      <button
+                        onClick={handleEliminarCredencial}
+                        className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
+                      >
+                        Eliminar
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {isSelected && mostrandoCredencial && (
+                <div className="flex flex-col space-y-2 text-lg">
+                  <div className="flex items-center gap-2">
+                    <label className="text-white">Usuario:</label>
+                    <input
+                      type="text"
+                      value={selectedName.user || ""}
+                      readOnly
+                      className="w-full border border-white bg-transparent text-white rounded-md px-3 py-2"
+                    />
+                    <button
+                      onClick={() =>
+                        copiarAlPortapapeles(selectedName.user || "", "usuario")
+                      }
+                      title="Copiar usuario"
+                      className="text-white hover:text-cyan-300"
+                    >
+                      <FaCopy />
+                    </button>
+                    {copiedField === "usuario" && (
+                      <span className="text-cyan-300 ml-2">¡Copiado!</span>
+                    )}
+                  </div>
+                  <div className="relative flex items-center gap-2">
+                    <label className="text-white">Contraseña:</label>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      value={selectedName.password || ""}
+                      readOnly
+                      className="w-full border border-white bg-transparent text-white rounded-md px-3 py-2 pr-10"
+                    />
+                    <span
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-8 top-3 cursor-pointer text-white"
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
+                    <button
+                      onClick={() =>
+                        copiarAlPortapapeles(selectedName.password || "", "password")
+                      }
+                      title="Copiar contraseña"
+                      className="text-white hover:text-cyan-300"
+                    >
+                      <FaCopy />
+                    </button>
+                    {copiedField === "password" && (
+                      <span className="text-cyan-300 ml-2">¡Copiado!</span>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </section>
+
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 w-96 text-black shadow-lg space-y-4">
+            <h2 className="text-xl font-semibold">Agregar Contraseña</h2>
+            <div className="text-lg flex flex-col space-y-2">
+              <label htmlFor="servicio" className="text-lg">Servicio:</label>
+              <input
+                id="servicio"
+                type="text"
+                value={servicio}
+                onChange={(e) => setServicio(e.target.value)}
+                className="border border-black rounded-md px-2 py-1 text-lg"
+              />
+              <label htmlFor="usuarioServicio" className="text-lg">Usuario Servicio:</label>
+              <input
+                id="usuarioServicio"
+                type="text"
+                value={usuarioServicio}
+                onChange={(e) => setUsuarioServicio(e.target.value)}
+                className="border border-black rounded-md px-2 py-1 text-lg"
+              />
+              <label htmlFor="contrasenaServicio" className="text-lg">Contraseña Servicio:</label>
+              <div className="relative">
+                <input
+                  id="contrasenaServicio"
+                  type={showPassword1 ? "text" : "password"}
+                  value={contrasenaServicio}
+                  onChange={(e) => setContrasenaServicio(e.target.value)}
+                  className="border border-black text-lg px-2 py-1 pr-10 w-full text-black rounded-md"
+                />
+                <span
+                  onClick={() => setShowPassword1(!showPassword1)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-600"
+                >
+                  {showPassword1 ? <FaEyeSlash /> : <FaEye />}
+                </span>
+              </div>
+              <label htmlFor="passwordLogin" className="text-lg">Contraseña Login:</label>
+              <div className="relative">
+                <input
+                  id="passwordLogin"
+                  type={showPassword2 ? "text" : "password"}
+                  value={passwordLogin}
+                  onChange={(e) => setPasswordLogin(e.target.value)}
+                  className="border border-black text-lg px-2 py-1 pr-10 w-full text-black rounded-md"
+                />
+                <span
+                  onClick={() => setShowPassword2(!showPassword2)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-600"
+                >
+                  {showPassword2 ? <FaEyeSlash /> : <FaEye />}
+                </span>
+              </div>
+            </div>
+            <article className="flex justify-end items-center text-lg w-full space-x-2 px-4">
+              <button
+                onClick={handleGuardarCredencial}
+                className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900"
+              >
                 Guardar
               </button>
-                <button onClick={() =>  setShowAddModal(false)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-800">
-                  Cerrar
-                </button>
+              <button
+                onClick={() => setShowAddModal(false)}
+                className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-800"
+              >
+                Cerrar
+              </button>
             </article>
-		  </div>
-		</div>
-	  )}
-
-		{showInfoModal && (
-		<div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
-		  <div className="bg-white rounded-xl p-6 w-96 text-black shadow-lg space-y-4">
-			<h2 className="text-xl font-semibold">Info de {selectedName?.name}</h2>
-			<div className="flex flex-col space-y-2">
-			  <label htmlFor="nameEdit" className="text-lg">User: {selectedName?.user}</label>
-			  <div className="relative">
-				<div className="flex items-center text-lg">
-				<label htmlFor="passwordEdit" className="text-lg">Contraseña:</label>
-					<div className="flex items-center justify-between pl-2">
-						<input id="passwordEdit" type={showPassword ? "text" : "password"} value={selectedName?.password || ""} readOnly
-						className="bg-transparent w-44"/>
-						<span onClick={() => setShowPassword(!showPassword)} className="cursor-pointer text-2xl pl-2">
-						{showPassword ? <FaEyeSlash /> : <FaEye />}
-						</span>
-					</div>
-				</div>
-			  </div>
-			  <label htmlFor="passwordEdit" className="text-lg">Creado: {selectedName?.aggregate} </label>
-			  <label htmlFor="passwordEdit" className="text-lg">Modificado: {selectedName?.modified} </label>
-			</div>
-            <article className='flex justify-between items-center text-lg w-full'>
-            <a href="" className='text-red-400 font-semibold hover:underline'>Eliminar</a>
-            <div className='flex space-x-1'>
-            <button onClick={() => setShowEditModal(true)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900">
-              Editar
-            </button>
-            <button onClick={() => setShowInfoModal(false)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900">
-              Cerrar
-            </button>
-            </div>
-            </article>
-		  </div>
-		</div>
-	  )}
-
-	  {showEditModal && (
-		<div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
-		  <div className="bg-white rounded-xl p-6 w-96 text-black shadow-lg space-y-4">
-			<h2 className="text-xl font-semibold">Editar: {selectedName?.name}</h2>
-			<div className="text-xl flex flex-col space-y-2">
-			  <label htmlFor="nameEdit" className="text-lg">User:</label>
-			  <input id="nameEdit" type="text" placeholder={selectedName?.user} className="border border-black rounded-md px-2 py-1" />
-			  <label htmlFor="passwordEdit" className="text-lg">Password:</label>
-			  <input id="passwordEdit" type="text" placeholder={selectedName?.password} className="border border-black rounded-md px-2 py-1" />
-			</div>
-            <article className='flex justify-end items-center text-lg w-full space-x-2 px-4'>
-            <button onClick={() => setShowEditModal(false)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900">
-              Guardar
-            </button>
-            <button onClick={() => setShowEditModal(false)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900">
-              Cerrar
-            </button>
-            </article>
-		  </div>
-		</div>
-	  )}
-
-	</div>
-  )
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

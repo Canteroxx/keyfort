@@ -115,3 +115,67 @@ export async function verificarCodigo2FA(usuarioId, codigo) {
 
   return data.token;
 }
+
+export async function crearCredencial(usuario_id, servicio, usuario, contrasena_usuario, contrasena) {
+  const respuesta = await fetch(`${backendUrl}/crear_credencial`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      usuario_id: usuario_id,
+      servicio: servicio,
+      usuario: usuario,
+      contrasena_usuario: contrasena_usuario,
+      contrasena: contrasena
+    })
+  });
+
+  const data = await respuesta.json();
+  if (!respuesta.ok) throw new Error(data.error || 'Error al crear credencial');
+  return data;
+}
+
+// Obtener la lista de servicios del usuario
+export async function obtenerMisCredenciales(usuario_id) {
+  const response = await fetch(`${backendUrl}/mis_credenciales?usuario_id=${usuario_id}`, {
+    headers: getAuthHeaders()
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Error al obtener servicios');
+  return data;
+}
+
+// Ver una credencial específica (requiere código 2FA y clave)
+export async function verCredencial({ usuario_id, credencial_id, contrasena_usuario, codigo_2fa }) {
+  const response = await fetch(`${backendUrl}/ver_credencial`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      usuario_id,
+      credencial_id,
+      contrasena_usuario,
+      codigo_2fa
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Error al desencriptar la credencial');
+  return data;
+}
+
+export async function eliminarCredencial({ usuario_id, credencial_id, contrasena_usuario, codigo_2fa }) {
+  const response = await fetch(`${backendUrl}/eliminar_credencial`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      usuario_id,
+      credencial_id,
+      contrasena_usuario,
+      codigo_2fa
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Error al eliminar credencial');
+  return data;
+}

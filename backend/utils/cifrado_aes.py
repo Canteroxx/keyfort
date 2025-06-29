@@ -23,3 +23,10 @@ def generar_clave_usuario_cifrada(contrasena: str):
     clave_cifrada = fernet.encrypt(clave_aes)
     return clave_cifrada, salt
 
+def obtener_fernet_usuario(clave_cifrada: bytes, salt: bytes, contrasena_plana: str) -> Fernet:
+    clave_derivada = derivar_clave_desde_contrasena(contrasena_plana, salt)
+    fernet_derivada = Fernet(clave_derivada)
+    clave_aes_descifrada = fernet_derivada.decrypt(clave_cifrada)
+    return Fernet(clave_aes_descifrada)
+
+
