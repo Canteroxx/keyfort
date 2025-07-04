@@ -61,7 +61,7 @@ export default function AddUser() {
         {users.map((user, i) => (
           <article
             key={i}
-            className='relative flex flex-row justify-between bg-white/5 p-4 rounded-2xl shadow-xl border border-white/10 text-white'>
+            className='relative flex flex-row justify-between bg-white/5 p-4 rounded-2xl shadow-xl border border-white/10 text-white mb-2'>
             <p>{user.nombre_usuario}</p>
             <button onClick={() => { setSelectedUser({ name: user.nombre_usuario, email: user.correo }); setShowInfoModal(true); setContextMenuUser(null); }}>
               <FaEllipsisV />

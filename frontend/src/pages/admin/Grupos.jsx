@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { FaPlus, FaEllipsisV, FaMinus} from 'react-icons/fa';
-import { crearUsuario, obtenerUsuarios } from '../../services/service';
+import { FaPlus, FaMinus} from 'react-icons/fa';
+import { obtenerUsuarios } from '../../services/service';
 
 export default function Grupos() {
   const [showAddGroup, setShowAddGroup] = useState(false);
@@ -44,7 +44,7 @@ export default function Grupos() {
       </nav>
 
       {showAddGroup && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 ">
+        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-[#e0f5ec] rounded-xl p-8 text-black shadow-lg space-y-4 w-[640px]">
             <h2 className="text-xl font-semibold">Crear Nuevo grupo</h2>
             <div className="flex flex-col space-y-2">

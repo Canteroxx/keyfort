@@ -144,7 +144,6 @@ export async function obtenerMisCredenciales(usuario_id) {
   if (!response.ok) throw new Error(data.error || 'Error al obtener servicios');
   return data;
 }
-
 // Ver una credencial específica (requiere código 2FA y clave)
 export async function verCredencial({ usuario_id, credencial_id, contrasena_usuario, codigo_2fa }) {
   const response = await fetch(`${backendUrl}/ver_credencial`, {

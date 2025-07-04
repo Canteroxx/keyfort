@@ -152,7 +152,7 @@ export default function Contraseñas() {
   };
 
   return (
-    <div className="text-3xl p-10 font-mono w-full text-md font-medium transition-all relative">
+    <div className="text-3xl p-10 font-handwriting w-full text-md font-medium transition-all relative">
       <p className="p-10 text-5xl text-white">Contraseñas</p>
       <nav className="justify-items-end px-5 pb-5">
         <button
@@ -174,19 +174,19 @@ export default function Contraseñas() {
         </button>
       </nav>
 
-      <section className="mt-4 space-y-4">
+      <section className="text-3xl">
         {passwords.map((item, index) => {
           const isSelected = selectedName?.id === item.id;
           return (
             <div
               key={index}
-              className="bg-white/10 text-white border border-white/20 rounded-xl p-4 flex flex-col gap-3"
+              className="bg-white/10 mb-2 text-white border border-white/10 rounded-xl p-4 flex flex-col gap-3"
             >
               <div className="flex justify-between items-center">
-                <p className="text-xl">Servicio: {item.servicio}</p>
-                <div className="flex gap-2">
+                <p className="">Servicio: {item.servicio}</p>
+                <div className="flex gap-2 text-white text-2xl">
                   <button
-                    className="text-white text-2xl"
+                    className=""
                     onClick={() => {
                       if (isSelected && !showDeleteForm) {
                         setSelectedName(null);
