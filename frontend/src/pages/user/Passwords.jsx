@@ -4,13 +4,13 @@ import ba from '../../assets/ba.png';
 import bc from '../../assets/bc.png';
 import {
   crearCredencial,
-  obtenerMisCredenciales,
+  obtenerCredencialesCompletas,
   verCredencial,
   eliminarCredencial,
 } from "../../services/service";
 import { obtenerDatosToken } from "../../services/auth";
 
-export default function Passwords() {
+export default function Contraseñas() {
   const [servicio, setServicio] = useState("");
   const [usuarioServicio, setUsuarioServicio] = useState("");
   const [contrasenaServicio, setContrasenaServicio] = useState("");
@@ -33,7 +33,7 @@ export default function Passwords() {
       if (!datosToken) throw new Error("Token inválido o expirado");
       const usuario_id = datosToken.usuario_id;
 
-      const res = await obtenerMisCredenciales(usuario_id);
+      const res = await obtenerCredencialesCompletas(usuario_id);
       setPasswords(res);
     } catch (err) {
       alert("Error al cargar credenciales: " + err.message);
@@ -98,10 +98,11 @@ export default function Passwords() {
     try {
       const datosToken = obtenerDatosToken();
       const usuario_id = datosToken.usuario_id;
-
+      console.log(selectedName.tipo)
       const response = await verCredencial({
         usuario_id,
         credencial_id: selectedName.id,
+        tipo: selectedName.tipo,
         contrasena_usuario: passwordLogin,
         codigo_2fa: codigo2FA,
       });
@@ -129,6 +130,7 @@ export default function Passwords() {
       await eliminarCredencial({
         usuario_id,
         credencial_id: selectedName.id,
+        tipo: selectedName.tipo,
         contrasena_usuario: passwordLogin,
         codigo_2fa: codigo2FA,
       });
@@ -152,7 +154,7 @@ export default function Passwords() {
   };
 
   return (
-    <div className="text-3xl p-10 font-mono w-full text-md font-medium transition-all relative">
+    <div className="text-3xl p-10 font-handwriting w-full text-md font-medium transition-all relative">
       <p className="p-10 text-5xl text-white">Contraseñas</p>
       <nav className="justify-items-end px-5 pb-5">
         <button
@@ -176,14 +178,11 @@ export default function Passwords() {
 
       <section className="text-3xl">
         {passwords.map((item, index) => {
-          const isSelected = selectedName?.id === item.id;
+          const isSelected = selectedName?.id === item.id && selectedName?.tipo === item.tipo;
           return (
-            <div
-              key={index}
-              className="bg-white/10 mb-2 text-white border border-white/10 rounded-xl p-4 flex flex-col gap-3"
-            >
+            <div key={index} className="bg-white/10 mb-2 text-white border border-white/10 rounded-xl p-4 flex flex-col gap-3">
               <div className="flex justify-between items-center">
-                <p className="">Servicio: {item.servicio}</p>
+                <p>Servicio: {item.servicio} <span className="italic text-sm text-cyan-300">({item.tipo === 'propia' ? 'Propia' : `Compartida por ${item.duenio}`})</span></p>
                 <div className="flex gap-2 text-white text-2xl">
                   <button
                     className=""

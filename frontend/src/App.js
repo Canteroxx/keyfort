@@ -22,12 +22,14 @@ import Solicitar from "./pages/Solicitar";
 import PrimerLogin from "./pages/PrimerLogin";
 import Conf2FA from "./pages/Conf2FA";
 import Verificar2FA from "./pages/Verificar2FA";
+import AceptarCompartida from "./pages/AceptarCompartida";
 import RutaNoEncontrada from "./pages/RutaNoEncontrada";
 
 function App() {
   return (
     <Routes>
       <Route path="/" element={<Navigate to="/Login" />} />
+      <Route path="/aceptar/:token" element={<AceptarCompartida />} />
       <Route path="/LostMyPassword" element={<Solicitar />} />
 
       <Route path="/Login" element={

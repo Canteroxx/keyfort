@@ -21,6 +21,18 @@ export async function obtenerUsuarios() {
   return await response.json();
 }
 
+export async function obtenerUsuariosct2fa() {
+  const response = await fetch(`${backendUrl}/extraer_usuarios_ct2fa`, {
+    headers: getAuthHeaders()
+  });
+
+  if (!response.ok) {
+    throw new Error('Error al obtener los usuarios');
+  }
+
+  return await response.json();
+}
+
 export async function crearUsuario(nombre_usuario, correo, rol) {
   const respuesta = await fetch(`${backendUrl}/crear_usuario`, {
     method: 'POST',
@@ -134,7 +146,6 @@ export async function crearCredencial(usuario_id, servicio, usuario, contrasena_
   return data;
 }
 
-// Obtener la lista de servicios del usuario
 export async function obtenerMisCredenciales(usuario_id) {
   const response = await fetch(`${backendUrl}/mis_credenciales?usuario_id=${usuario_id}`, {
     headers: getAuthHeaders()
@@ -144,14 +155,25 @@ export async function obtenerMisCredenciales(usuario_id) {
   if (!response.ok) throw new Error(data.error || 'Error al obtener servicios');
   return data;
 }
-// Ver una credencial específica (requiere código 2FA y clave)
-export async function verCredencial({ usuario_id, credencial_id, contrasena_usuario, codigo_2fa }) {
+
+export async function obtenerCredencialesCompletas(usuario_id) {
+  const response = await fetch(`${backendUrl}/mis_credenciales_completas?usuario_id=${usuario_id}`, {
+    headers: getAuthHeaders()
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Error al obtener credenciales');
+  return data;
+}
+
+export async function verCredencial({ usuario_id, credencial_id, tipo, contrasena_usuario, codigo_2fa }) {
   const response = await fetch(`${backendUrl}/ver_credencial`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({
       usuario_id,
       credencial_id,
+      tipo,
       contrasena_usuario,
       codigo_2fa
     })
@@ -162,13 +184,14 @@ export async function verCredencial({ usuario_id, credencial_id, contrasena_usua
   return data;
 }
 
-export async function eliminarCredencial({ usuario_id, credencial_id, contrasena_usuario, codigo_2fa }) {
+export async function eliminarCredencial({ usuario_id, credencial_id, tipo, contrasena_usuario, codigo_2fa }) {
   const response = await fetch(`${backendUrl}/eliminar_credencial`, {
     method: 'DELETE',
     headers: getAuthHeaders(),
     body: JSON.stringify({
       usuario_id,
       credencial_id,
+      tipo,
       contrasena_usuario,
       codigo_2fa
     })
@@ -178,3 +201,139 @@ export async function eliminarCredencial({ usuario_id, credencial_id, contrasena
   if (!response.ok) throw new Error(data.error || 'Error al eliminar credencial');
   return data;
 }
+
+export async function crearGrupo(nombre, usuarios = []) {
+  const response = await fetch(`${backendUrl}/crear_grupo`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      nombre: nombre,
+      usuarios: usuarios
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {
+    throw new Error(data.error || 'Error al crear grupo');
+  }
+
+  return data;
+}
+
+export async function obtenerGrupos() {
+  const response = await fetch(`${backendUrl}/grupos`, {
+    headers: getAuthHeaders()
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Error al obtener grupos');
+  return data;
+}
+
+export async function eliminarGrupo(grupoId) {
+  const response = await fetch(`${backendUrl}/eliminar_grupo/${grupoId}`, {
+    method: 'DELETE',
+    headers: getAuthHeaders()
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Error al eliminar grupo');
+  return data;
+}
+
+export async function eliminarUsuarioDelGrupo(grupoId, usuarioId) {
+  const response = await fetch(`${backendUrl}/grupo/${grupoId}/eliminar_usuario`, {
+    method: 'DELETE',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ usuario_id: usuarioId }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Error al eliminar usuario del grupo');
+  return data;
+}
+
+export async function agregarUsuarioAlGrupo(grupoId, usuarioId) {
+  const response = await fetch(`${backendUrl}/grupo/${grupoId}/agregar_usuario`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ usuario_id: usuarioId }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error || 'Error al agregar usuario al grupo');
+  return data;
+}
+
+export async function obtenerCredencialesDelUsuario(usuario_id) {
+
+  const response = await fetch(`${backendUrl}/credenciales_usuario/${usuario_id}`, {
+    method: 'GET',
+    headers: getAuthHeaders()
+  });
+
+  const data = await response.json();
+  if (!response.ok) throw new Error(data.error ||  'Error al obtener credenciales del usuario');
+  return data;
+}
+
+export async function enviarSolicitudesCompartidas(emisor_id, receptor_id, credenciales_ids, muchas) {
+  const response = await fetch(`${backendUrl}/solicitar_compartir`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      emisor_id,
+      receptor_id,
+      credenciales_ids,
+      muchas
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {throw new Error(data.error || 'Error al enviar solicitudes de compartir credenciales');}
+  return data;
+}
+
+export async function verificarYaAceptadas(payload) {
+  const response = await fetch(`${backendUrl}/ya_aceptada`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {throw new Error(data.error || 'Error al verificar si ya fue aceptada');}
+  return data;
+}
+
+
+export async function validarTokenCompartida(token) {
+  const response = await fetch(`${backendUrl}/validar_token_compartida/${token}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+  });
+  const data = await response.json();
+  if (!response.ok) {throw new Error(data.error || 'Error al validar token temporal');}
+  return data;
+}
+
+
+export async function aceptarCompartida(token, contrasena) {
+  const response = await fetch(`${backendUrl}/aceptar_compartida`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      token,
+      contrasena
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {throw new Error(data.error || 'Error al aceptar la credencial compartida');}
+  return data;
+}
+

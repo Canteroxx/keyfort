@@ -4,7 +4,7 @@ import ba from '../../assets/ba.png';
 import bc from '../../assets/bc.png';
 import {
   crearCredencial,
-  obtenerMisCredenciales,
+  obtenerCredencialesCompletas,
   verCredencial,
   eliminarCredencial,
 } from "../../services/service";
@@ -33,7 +33,7 @@ export default function Contraseñas() {
       if (!datosToken) throw new Error("Token inválido o expirado");
       const usuario_id = datosToken.usuario_id;
 
-      const res = await obtenerMisCredenciales(usuario_id);
+      const res = await obtenerCredencialesCompletas(usuario_id);
       setPasswords(res);
     } catch (err) {
       alert("Error al cargar credenciales: " + err.message);
@@ -98,10 +98,11 @@ export default function Contraseñas() {
     try {
       const datosToken = obtenerDatosToken();
       const usuario_id = datosToken.usuario_id;
-
+      console.log(selectedName.tipo)
       const response = await verCredencial({
         usuario_id,
         credencial_id: selectedName.id,
+        tipo: selectedName.tipo,
         contrasena_usuario: passwordLogin,
         codigo_2fa: codigo2FA,
       });
@@ -129,6 +130,7 @@ export default function Contraseñas() {
       await eliminarCredencial({
         usuario_id,
         credencial_id: selectedName.id,
+        tipo: selectedName.tipo,
         contrasena_usuario: passwordLogin,
         codigo_2fa: codigo2FA,
       });
@@ -176,14 +178,11 @@ export default function Contraseñas() {
 
       <section className="text-3xl">
         {passwords.map((item, index) => {
-          const isSelected = selectedName?.id === item.id;
+          const isSelected = selectedName?.id === item.id && selectedName?.tipo === item.tipo;
           return (
-            <div
-              key={index}
-              className="bg-white/10 mb-2 text-white border border-white/10 rounded-xl p-4 flex flex-col gap-3"
-            >
+            <div key={index} className="bg-white/10 mb-2 text-white border border-white/10 rounded-xl p-4 flex flex-col gap-3">
               <div className="flex justify-between items-center">
-                <p className="">Servicio: {item.servicio}</p>
+                <p>Servicio: {item.servicio} <span className="italic text-sm text-cyan-300">({item.tipo === 'propia' ? 'Propia' : `Compartida por ${item.duenio}`})</span></p>
                 <div className="flex gap-2 text-white text-2xl">
                   <button
                     className=""

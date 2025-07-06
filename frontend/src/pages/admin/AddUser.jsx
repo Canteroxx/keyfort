@@ -1,6 +1,7 @@
 import React, { useState, useEffect, use } from 'react';
 import { FaPlus, FaEllipsisV } from 'react-icons/fa';
 import { crearUsuario, obtenerUsuarios } from '../../services/service';
+import { obtenerDatosToken } from '../../services/auth';
 
 export default function AddUser() {
   const [showAddModal, setShowAddModal] = useState(false);
@@ -19,8 +20,11 @@ export default function AddUser() {
 
   const cargarUsuarios = async () => {
     try {
+      const datosToken = obtenerDatosToken();
+      const miId = datosToken.usuario_id;
       const data = await obtenerUsuarios();
-      setUsers(data);
+      const filtrados = data.filter(usuario => usuario.id !== miId);
+      setUsers(filtrados);
     } catch (error) {
       console.error('Error al cargar usuarios:', error.message);
     }

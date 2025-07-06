@@ -50,9 +50,26 @@ class Credencial(db.Model):
 
     duenio_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
 
-    grupos_compartidos = db.relationship('Grupo', secondary=compartidas_grupos, back_populates='credenciales')
-    usuarios_compartidos = db.relationship('CredencialCompartidaUsuario', backref='credencial', lazy=True)
-    accesos = db.relationship('RegistroAcceso', backref='credencial', lazy=True)
+    grupos_compartidos = db.relationship(
+        'Grupo',
+        secondary=compartidas_grupos,
+        back_populates='credenciales'
+    )
+
+    usuarios_compartidos = db.relationship(
+        'CredencialCompartidaUsuario',
+        backref='credencial',
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
+    accesos = db.relationship(
+        'RegistroAcceso',
+        backref='credencial',
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
 
 class CredencialCompartidaUsuario(db.Model):
     __tablename__ = 'credenciales_compartidas_usuarios'
@@ -74,3 +91,8 @@ class RegistroAcceso(db.Model):
 
     tipo_acceso = db.Column(db.String(50), nullable=False)  
     fecha_hora = db.Column(db.DateTime, default=datetime.utcnow)
+
+class TokenCompartidoUsado(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(512), unique=True, nullable=False)
+    usado_en = db.Column(db.DateTime, default=datetime.utcnow)
