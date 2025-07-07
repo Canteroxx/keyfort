@@ -23,8 +23,7 @@ db.init_app(app)
 
 registrar_rutas(app)
 
-# ✅ Función que se ejecuta solo una vez al levantar
-def inicializar_datos():
+if __name__ == '__main__':
     with app.app_context():
         db.create_all()
         nombres = os.getenv("NAMES_ADMIN", "").split(",")
@@ -53,4 +52,4 @@ def inicializar_datos():
 
         db.session.commit()
 
-inicializar_datos()
+    app.run(debug=True)

@@ -6,11 +6,6 @@ usuarios_grupos = db.Table('usuarios_grupos',
     db.Column('grupo_id', db.Integer, db.ForeignKey('grupos.id'), primary_key=True)
 )
 
-compartidas_grupos = db.Table('credenciales_compartidas_grupos',
-    db.Column('credencial_id', db.Integer, db.ForeignKey('credenciales.id'), primary_key=True),
-    db.Column('grupo_id', db.Integer, db.ForeignKey('grupos.id'), primary_key=True)
-)
-
 class Usuario(db.Model):
     __tablename__ = 'usuarios'
 
@@ -37,7 +32,6 @@ class Grupo(db.Model):
     nombre = db.Column(db.String(50), unique=True, nullable=False)
 
     usuarios = db.relationship('Usuario', secondary=usuarios_grupos, back_populates='grupos')
-    credenciales = db.relationship('Credencial', secondary=compartidas_grupos, back_populates='grupos_compartidos')
 
 class Credencial(db.Model):
     __tablename__ = 'credenciales'
@@ -50,9 +44,28 @@ class Credencial(db.Model):
 
     duenio_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
 
-    grupos_compartidos = db.relationship('Grupo', secondary=compartidas_grupos, back_populates='credenciales')
-    usuarios_compartidos = db.relationship('CredencialCompartidaUsuario', backref='credencial', lazy=True)
-    accesos = db.relationship('RegistroAcceso', backref='credencial', lazy=True)
+    usuarios_compartidos = db.relationship(
+        'CredencialCompartidaUsuario',
+        backref='credencial',
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
+    accesos = db.relationship(
+        'RegistroAcceso',
+        backref='credencial',
+        lazy=True,
+        cascade="all, delete-orphan"
+    )
+
+    compartidas_por_grupo = db.relationship(
+        'CredencialCompartidaGrupoUsuario',
+        backref='credencial',
+        cascade="all, delete-orphan",
+        passive_deletes=True
+    )
+
+
 
 class CredencialCompartidaUsuario(db.Model):
     __tablename__ = 'credenciales_compartidas_usuarios'
@@ -74,3 +87,26 @@ class RegistroAcceso(db.Model):
 
     tipo_acceso = db.Column(db.String(50), nullable=False)  
     fecha_hora = db.Column(db.DateTime, default=datetime.utcnow)
+
+class TokenCompartidoUsado(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    token = db.Column(db.String(512), unique=True, nullable=False)
+    usado_en = db.Column(db.DateTime, default=datetime.utcnow)
+
+class CredencialCompartidaGrupoUsuario(db.Model):
+    __tablename__ = 'credenciales_compartidas_grupos_usuarios'
+
+    credencial_id = db.Column(
+        db.Integer,
+        db.ForeignKey('credenciales.id', ondelete='CASCADE'),
+        primary_key=True
+    )
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), primary_key=True)
+    grupo_id = db.Column(db.Integer, db.ForeignKey('grupos.id'), primary_key=True)
+
+    usuario_cifrado = db.Column(db.Text, nullable=False)
+    contrasena_cifrada = db.Column(db.Text, nullable=False)
+
+    usuario = db.relationship('Usuario', backref='recibidas_por_grupo')
+    grupo = db.relationship('Grupo')
+
