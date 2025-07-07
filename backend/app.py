@@ -20,36 +20,33 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
 
 db.init_app(app)
-
 registrar_rutas(app)
 
-if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        nombres = os.getenv("NAMES_ADMIN", "").split(",")
-        correos = os.getenv("CORREOS_ADMIN", "").split(",")
-        contrasenas = os.getenv("PASSWDS_ADMIN", "").split(",")
+# Inicialización de la base y admins
+with app.app_context():
+    db.create_all()
+    nombres = os.getenv("NAMES_ADMIN", "").split(",")
+    correos = os.getenv("CORREOS_ADMIN", "").split(",")
+    contrasenas = os.getenv("PASSWDS_ADMIN", "").split(",")
 
-        for nombre, correo, contrasena in zip(nombres, correos, contrasenas):
-            nombre = nombre.strip()
-            correo = correo.strip()
-            contrasena = contrasena.strip()
+    for nombre, correo, contrasena in zip(nombres, correos, contrasenas):
+        nombre = nombre.strip()
+        correo = correo.strip()
+        contrasena = contrasena.strip()
 
-            if not Usuario.query.filter_by(correo=correo).first():
-                clave_cifrada, salt = generar_clave_usuario_cifrada(contrasena)
+        if not Usuario.query.filter_by(correo=correo).first():
+            clave_cifrada, salt = generar_clave_usuario_cifrada(contrasena)
 
-                admin = Usuario(
-                    nombre_usuario=nombre,
-                    correo=correo,
-                    contrasena_hash=hashear_contrasena(contrasena),
-                    rol="Admin",
-                    clave_cifrada=clave_cifrada,
-                    salt=salt,
-                    contrasena_temporal=False,
-                )
+            admin = Usuario(
+                nombre_usuario=nombre,
+                correo=correo,
+                contrasena_hash=hashear_contrasena(contrasena),
+                rol="Admin",
+                clave_cifrada=clave_cifrada,
+                salt=salt,
+                contrasena_temporal=False,
+            )
 
-                db.session.add(admin)
+            db.session.add(admin)
 
-        db.session.commit()
-
-    app.run(debug=True)
+    db.session.commit()
