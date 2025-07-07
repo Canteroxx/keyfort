@@ -41,19 +41,29 @@ def verificar_token(func):
 
     return wrapper
 
-def generar_token_compartida(credenciales_validas, receptor_id): 
+def generar_token_compartida(credenciales_data, receptor_id, grupo_id):
     s = TimedSerializer(current_app.config['SECRET_KEY'])
     token = s.dumps({
-        'credenciales_ids': credenciales_validas,
-        'usuario_id': receptor_id
+        'credenciales': credenciales_data,
+        'usuario_id': receptor_id,
+        'grupo_id': grupo_id
     })
     return token
 
-def cargar_token_compartida(token, max_age=86400):  # 24h en segundos
+
+def cargar_token_compartida(token, max_age=86400):  
     s = TimedSerializer(current_app.config['SECRET_KEY'])
     try:
-        return s.loads(token, max_age=max_age)
+        datos = s.loads(token, max_age=max_age)
+        
+        return {
+            'credenciales': datos['credenciales'],
+            'usuario_id': datos['usuario_id'],
+            'grupo_id': datos.get('grupo_id')
+        }
+
     except SignatureExpired:
         raise Exception('Token expirado')
     except BadSignature:
         raise Exception('Token inválido')
+

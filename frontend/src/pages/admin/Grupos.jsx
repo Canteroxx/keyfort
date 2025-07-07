@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+{/*import React, { useState, useEffect } from 'react';
 import { FaPlus, FaMinus } from 'react-icons/fa';
-import { obtenerUsuarios, crearGrupo, obtenerGrupos, eliminarGrupo, eliminarUsuarioDelGrupo, agregarUsuarioAlGrupo } from '../../services/service';
+import { obtenerUsuarios, obtenerMisCredenciales, crearGrupo, obtenerGrupos, eliminarGrupo, eliminarUsuarioDelGrupo, agregarUsuarioAlGrupo, enviarSolicitudesCompartidasGrupo } from '../../services/service';
+import { obtenerDatosToken } from "../../services/auth";
 
 export default function Grupos() {
   const [showAddGroup, setShowAddGroup] = useState(false);
@@ -11,6 +12,11 @@ export default function Grupos() {
   const [grupoSeleccionado, setGrupoSeleccionado] = useState(null); // grupo donde se agregarán usuarios
   const [modalAgregarUsuarios, setModalAgregarUsuarios] = useState(false);
   const [usuariosAgregar, setUsuariosAgregar] = useState([]); // usuarios seleccionados en el modal
+  const [modalCompartir, setModalCompartir] = useState(false);
+  const [grupoParaCompartir, setGrupoParaCompartir] = useState(null);
+  const [credenciales, setCredenciales] = useState([]);
+  const [credencialesSeleccionadas, setCredencialesSeleccionadas] = useState([]);
+  const [contrasenaLogin, setContrasenaLogin] = useState("");
 
 
   const toggleSeleccion = (id) => {
@@ -25,6 +31,23 @@ export default function Grupos() {
     setModalAgregarUsuarios(true);
   };
 
+  const compartirCredencialesConGrupo = async (grupo) => {
+    setGrupoParaCompartir(grupo);
+    setCredencialesSeleccionadas([]);
+    setContrasenaLogin("");
+    setModalCompartir(true);
+
+    try {
+      const datosToken = obtenerDatosToken();
+      if (!datosToken) throw new Error("Token inválido o expirado");
+      const usuario_id = datosToken.usuario_id;
+
+      const res = await obtenerMisCredenciales(usuario_id);
+      setCredenciales(res);
+    } catch (err) {
+      alert("Error al cargar credenciales: " + err.message);
+    }
+  };
 
   const handleCerrarModal = () => {
     setShowAddGroup(false);
@@ -75,14 +98,39 @@ export default function Grupos() {
   };
 
   const agregarUsuariosSeleccionados = async () => {
+    if(!contrasenaLogin){
+      alert("Agrega tu contraseña de Login para agregar usuarios al grupo");
+      return
+    }
     try {
       for (const usuarioId of usuariosAgregar) {
-        await agregarUsuarioAlGrupo(grupoSeleccionado.id, usuarioId);
+        await agregarUsuarioAlGrupo(grupoSeleccionado.id, usuarioId, contrasenaLogin);
       }
       setModalAgregarUsuarios(false);
+      setContrasenaLogin("");
       await cargarGrupos();
     } catch (error) {
+      setContrasenaLogin("");
       alert("Error al agregar usuarios: " + error.message);
+    }
+  };
+
+  const HandleCredencialesConGrupo = async () => {
+    const datos = obtenerDatosToken();
+    const muchas = credencialesSeleccionadas.length > 1;
+
+    try {
+      await enviarSolicitudesCompartidasGrupo(
+        datos.usuario_id,
+        contrasenaLogin,
+        grupoParaCompartir.id,
+        credencialesSeleccionadas,
+        muchas
+      );
+      alert("Solicitud enviada correctamente a los usuarios del grupo");
+      setCredencialesSeleccionadas([]);
+    } catch (err) {
+      alert("Error al enviar solicitud a los usuarios del grupo: " + err.message);
     }
   };
 
@@ -118,7 +166,7 @@ export default function Grupos() {
     <div className='text-3xl p-10 font-mono w-full text-md transition-all relative'>
       <p className='p-10 text-5xl text-white'>Grupos</p>
 
-      {/* Botón agregar grupo */}
+
       <nav className='justify-items-end px-5 pb-5'>
         <button onClick={() => setShowAddGroup(true)}
           className="flex flex-row items-center gap-3 px-4 py-2 rounded-md text-white text-xl bg-cyan-700 border border-cyan-300 hover:bg-cyan-800">
@@ -127,14 +175,14 @@ export default function Grupos() {
         </button>
       </nav>
 
-      {/* Lista de grupos */}
+
       <div className='space-y-4 text-white px-5'>
         {grupos.length === 0 && <p className="text-lg italic">No hay grupos registrados aún.</p>}
         {grupos.map((grupo) => (
           <div key={grupo.id} className="bg-[#222d3d] p-4 rounded-lg shadow-lg relative">
             <h3 className="text-2xl font-semibold">{grupo.nombre}</h3>
             <ul className="ml-4 mt-2 text-lg space-y-1">
-              {grupo.usuarios.map(u => (
+              {grupo.usuarios.filter(u => u.rol === 'Usuario').map(u => (
                 <li key={u.id} className="flex justify-between items-center bg-[#2e3c4f] px-3 py-2 rounded">
                   <span>{u.nombre_usuario}</span>
                   <button
@@ -159,11 +207,15 @@ export default function Grupos() {
             >
               Eliminar grupo
             </button>
+            <button
+              onClick={() => compartirCredencialesConGrupo(grupo)}
+              className={'mt-2 px-3 py-1 rounded text-sm bg-blue-600 text-white hover:bg-blue-700'}>
+              Compartir credenciales
+            </button>
           </div>
         ))}
       </div>
 
-      {/* Modal de crear grupo */}
       {showAddGroup && (
         <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
           <div className="bg-[#e0f5ec] rounded-xl p-8 text-black shadow-lg space-y-4 w-[640px]">
@@ -229,6 +281,14 @@ export default function Grupos() {
                 );
               })}
             </section>
+            <label htmlFor="contrasena" className="text-lg">Contraseña Login:</label>
+            <input
+              type="password"
+              id="contrasena"
+              value={contrasenaLogin}
+              onChange={(e) => setContrasenaLogin(e.target.value)}
+              className="text-lg border border-black rounded-md px-2 py-1"
+            />
             <div className="flex justify-end space-x-2">
               <button onClick={agregarUsuariosSeleccionados} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Agregar</button>
               <button onClick={() => setModalAgregarUsuarios(false)} className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600">Cancelar</button>
@@ -236,6 +296,73 @@ export default function Grupos() {
           </div>
         </div>
       )}
+      {modalCompartir && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-[#e0f5ec] rounded-xl p-8 text-black shadow-lg space-y-4 w-[640px]">
+            <h2 className="text-xl font-semibold">Compartir credenciales con el grupo "{grupoParaCompartir.nombre}"</h2>
+
+            <div className="flex flex-col space-y-4">
+              <label htmlFor="credenciales" className="text-lg">Selecciona credenciales:</label>
+              <section className='text-xl p-4 rounded-2xl shadow-xl border border-white/10 bg-[#f4f0ff] space-y-2 max-h-60 overflow-y-auto'>
+                {credenciales.map((cred) => {
+                  const seleccionado = credencialesSeleccionadas.includes(cred.id);
+                  return (
+                    <article
+                      key={cred.id}
+                      className={`flex justify-between items-center px-4 py-2 rounded-xl shadow-sm border 
+                        ${seleccionado ? 'bg-[#b0b0b0] text-white' : 'bg-[#e7e6f8] text-black'}`}>
+                      <p>{cred.servicio}</p>
+                      <button onClick={() => {
+                        setCredencialesSeleccionadas(prev =>
+                          prev.includes(cred.id)
+                            ? prev.filter(id => id !== cred.id)
+                            : [...prev, cred.id]
+                        );
+                      }} className="text-xl">
+                        {seleccionado ? <FaMinus /> : <FaPlus />}
+                      </button>
+                    </article>
+                  );
+                })}
+              </section>
+
+              <label htmlFor="contrasena" className="text-lg">Contraseña Login:</label>
+              <input
+                type="password"
+                id="contrasena"
+                value={contrasenaLogin}
+                onChange={(e) => setContrasenaLogin(e.target.value)}
+                className="text-lg border border-black rounded-md px-2 py-1"
+              />
+            </div>
+
+            <article className='flex justify-end items-center text-lg w-full space-x-2 px-4'>
+              <button
+                onClick={() => HandleCredencialesConGrupo()}
+                className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900"
+              >
+                Compartir
+              </button>
+              <button
+                onClick={() => setModalCompartir(false)}
+                className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900"
+              >
+                Cerrar
+              </button>
+            </article>
+          </div>
+        </div>
+      )}
+
     </div>
   );
+}
+*/}
+
+export default function Grupos() {
+    return (
+    <div className='text-3xl p-10 font-mono w-full text-md font-mono transition-all relative'>
+        <p className='p-10 text-6xl text-white'>Grupos Funcionales</p>
+    </div>
+  )
 }

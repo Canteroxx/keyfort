@@ -9,6 +9,7 @@ function getAuthHeaders(extraHeaders = {}) {
   };
 }
 
+
 export async function obtenerUsuarios() {
   const response = await fetch(`${backendUrl}/extraer_usuarios`, {
     headers: getAuthHeaders()
@@ -201,7 +202,7 @@ export async function eliminarCredencial({ usuario_id, credencial_id, tipo, cont
   if (!response.ok) throw new Error(data.error || 'Error al eliminar credencial');
   return data;
 }
-
+{/*
 export async function crearGrupo(nombre, usuarios = []) {
   const response = await fetch(`${backendUrl}/crear_grupo`, {
     method: 'POST',
@@ -264,6 +265,7 @@ export async function agregarUsuarioAlGrupo(grupoId, usuarioId) {
   if (!response.ok) throw new Error(data.error || 'Error al agregar usuario al grupo');
   return data;
 }
+*/}
 
 export async function obtenerCredencialesDelUsuario(usuario_id) {
 
@@ -277,12 +279,13 @@ export async function obtenerCredencialesDelUsuario(usuario_id) {
   return data;
 }
 
-export async function enviarSolicitudesCompartidas(emisor_id, receptor_id, credenciales_ids, muchas) {
+export async function enviarSolicitudesCompartidas(emisor_id, contrasena_emisor, receptor_id, credenciales_ids, muchas) {
   const response = await fetch(`${backendUrl}/solicitar_compartir`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify({
       emisor_id,
+      contrasena_emisor,
       receptor_id,
       credenciales_ids,
       muchas
@@ -302,20 +305,23 @@ export async function verificarYaAceptadas(payload) {
   });
 
   const data = await response.json();
+  console.log(data);
   if (!response.ok) {throw new Error(data.error || 'Error al verificar si ya fue aceptada');}
   return data;
 }
 
 
 export async function validarTokenCompartida(token) {
-  const response = await fetch(`${backendUrl}/validar_token_compartida/${token}`, {
-    method: 'GET',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+  const response = await fetch(`${backendUrl}/validar_token_compartida`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
   });
   const data = await response.json();
-  if (!response.ok) {throw new Error(data.error || 'Error al validar token temporal');}
+  console.log(token, data)
+  if (!response.ok) {
+    throw new Error(data.error || 'Error al validar token temporal');
+  }
   return data;
 }
 
@@ -337,3 +343,66 @@ export async function aceptarCompartida(token, contrasena) {
   return data;
 }
 
+{/*
+export async function enviarSolicitudesCompartidasGrupo(emisor_id, contrasena_emisor, grupo_id, credenciales_ids, muchas) {
+  const response = await fetch(`${backendUrl}/solicitar_compartir_grupo`, {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({
+      emisor_id,
+      contrasena_emisor,
+      grupo_id,
+      credenciales_ids,
+      muchas
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {throw new Error(data.error || 'Error al enviar solicitudes de compartir credenciales al grupo');}
+  return data;
+}
+
+export async function verificarYaAceptadasGrupo(token) {
+  const response = await fetch(`${backendUrl}/ya_aceptada_grupo`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ token }),
+  });
+
+  const data = await response.json();
+  if (!response.ok) {throw new Error(data.error || 'Error al verificar si ya fue aceptada');}
+  return data;
+}
+
+export async function aceptarCompartidaGrupo(token, contrasena) {
+  const response = await fetch(`${backendUrl}/aceptar_compartida_grupo`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      token,
+      contrasena
+    })
+  });
+
+  const data = await response.json();
+  if (!response.ok) {throw new Error(data.error || 'Error al aceptar credenciales compartidas por el grupo');}
+  return data;
+}
+
+export async function obtenerGruposConCredenciales(id) {
+  const response = await fetch('/mis_grupos_credenciales', {
+    method: 'POST',
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ id })
+
+  });
+  console.log(response);
+  if (!response.ok) {
+    throw new Error('No se pudieron obtener tus grupos con credenciales');
+  }
+
+  return await response.json();
+}
+*/}

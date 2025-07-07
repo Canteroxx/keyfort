@@ -9,6 +9,7 @@ load_dotenv()
 EMAIL_SENDER = os.getenv('EMAIL_SENDER')
 EMAIL_PASSWORD = os.getenv('EMAIL_PASSWORD')
 ROUTE_ACEPTAR = os.getenv('ROUTE_ACEPTAR')
+ROUTE_ACEPTAR_GRUPO = os.getenv('ROUTE_ACEPTAR_GRUPO')
 
 def enviar_correo_contrasena(correo_destino, nombre_usuario, contrasena_temp):
     msg = EmailMessage()
@@ -22,31 +23,55 @@ def enviar_correo_contrasena(correo_destino, nombre_usuario, contrasena_temp):
         smtp.login(EMAIL_SENDER, EMAIL_PASSWORD)
         smtp.send_message(msg)
 
-def enviar_correo_notificacion_solicitud(destinatario, nombre_emisor, muchas, servicios, token):
+def enviar_correo_notificacion_solicitud(destinatario, nombre_emisor, muchas, servicios, token, grupo=False):
     token_url = urllib.parse.quote(token)
-    url = f"{ROUTE_ACEPTAR}/{token_url}"
+    url = f"{ROUTE_ACEPTAR if not grupo else ROUTE_ACEPTAR_GRUPO}/{token_url}"
 
     servicios_texto = ', '.join(servicios) 
 
     # Configurar mensaje
     msg = EmailMessage()
-    msg['Subject'] = f'{nombre_emisor} quiere compartir {'unas contraseñas' if muchas else 'una contraseña'} contigo'
+    msg['Subject'] = (
+        f"{nombre_emisor} quiere compartir {'varias contraseñas' if muchas else 'una contraseña'} contigo"
+        if not grupo else
+        f"Nuevo acceso compartido desde el grupo '{nombre_emisor}'"
+    )
     msg['From'] = EMAIL_SENDER
     msg['To'] = destinatario
 
-    cuerpo = f'''
+    if not grupo:
+        cuerpo = f'''
 Hola,
 
-El usuario {nombre_emisor} quiere compartir {'unas contraseñas de los servicios' if muchas else 'una contraseña del servicio'} "{servicios_texto}" contigo.
+El usuario **{nombre_emisor}** desea compartir {'las contraseñas de los siguientes servicios' if muchas else 'la contraseña del siguiente servicio'} contigo:
 
-Para aceptar, haz clic en el siguiente enlace:
+{servicios_texto}
+
+Para aceptar el acceso, haz clic en el siguiente enlace:
 
 {url}
 
-Este enlace es único y expira en 24 horas.
+Este enlace es único y expirará en 24 horas.
 
-Saludos,  
-KeyFort Team
+Saludos cordiales,  
+Equipo de KeyFort
+'''
+    else:
+        cuerpo = f'''
+Hola,
+
+Desde el grupo **{nombre_emisor}**, se han compartido {'contraseñas de los siguientes servicios' if muchas else 'una contraseña del siguiente servicio'} contigo:
+
+{servicios_texto}
+
+Para aceptar el acceso, haz clic en el siguiente enlace:
+
+{url}
+
+Este enlace es único y estará disponible por 24 horas.
+
+Saludos cordiales,  
+Equipo de KeyFort
 '''
 
     msg.set_content(cuerpo.strip())

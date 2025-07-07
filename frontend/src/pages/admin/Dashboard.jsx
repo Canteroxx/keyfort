@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+{/* import { useState, useEffect } from 'react';
 export default function Dashboard() {
   const [totalCredenciales, setTotalCredenciales] = useState(0);
 
@@ -50,8 +50,6 @@ export default function Dashboard() {
                 <th className="pb-2">Contraseña</th>
               </tr>
             </thead>
-               {/* aca debi poner el registro de cada usuario*/}
-               {/*  
                 <tbody>
               {historialAccesos.map((item, index) => (
                 <tr key={index} className="border-b border-white/10 hover:bg-white/5 transition">
@@ -61,11 +59,20 @@ export default function Dashboard() {
                   <td>{item.servicio}</td>
                 </tr>
               ))}
-            </tbody> */}
+            </tbody> 
 
           </table>
         </div>
       </div>
     </div>
   );
+}
+*/}
+
+export default function Dashboard() {
+    return (
+    <div className='text-3xl p-10 font-mono w-full text-md font-mono transition-all relative'>
+        <p className='p-10 text-5xl text-white'>Dashboard</p>
+    </div>
+  )
 }

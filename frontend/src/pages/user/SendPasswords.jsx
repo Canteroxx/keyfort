@@ -13,6 +13,7 @@ export default function Enviar() {
   const [credencialesSeleccionadas, setCredencialesSeleccionadas] = useState([]);
   const [usuarioDestino, setUsuarioDestino] = useState(null);
   const [credencialesFiltradas, setCredencialesFiltradas] = useState([]);
+  const [contrasenaEmisor, setContrasenaEmisor] = useState('')
 
   useEffect(() => {
     cargarDatos();
@@ -20,12 +21,11 @@ export default function Enviar() {
 
   const cargarDatos = async () => {
     try {
-      const datosToken = obtenerDatosToken(); // Extraer ID del usuario actual
+      const datosToken = obtenerDatosToken(); 
       const miId = datosToken.usuario_id;
 
       const data = await obtenerUsuariosct2fa();
 
-      // Filtrar usuarios que no sean el actual
       const filtrados = data.filter(usuario => usuario.id !== miId);
 
       setTodosLosUsuarios(filtrados);
@@ -67,19 +67,26 @@ export default function Enviar() {
   };
 
   const compartirCredenciales = async () => {
+    if(!contrasenaEmisor){
+      alert("Agrega tu contraseña de Login para compartir contraseñas");
+      return
+    }
+
     const datos = obtenerDatosToken();
     const muchas = credencialesSeleccionadas.length > 1;
 
     try {
       await enviarSolicitudesCompartidas(
         datos.usuario_id,
+        contrasenaEmisor,
         usuarioDestino.id,
         credencialesSeleccionadas,
         muchas
       );
-      alert("Solicitudes enviadas correctamente");
+      alert("Solicitud enviada correctamente");
       setSendPassword(false);
       setCredencialesSeleccionadas([]);
+      setContrasenaEmisor('');
     } catch (err) {
       alert("Error al enviar solicitud: " + err.message);
     }
@@ -184,7 +191,14 @@ export default function Enviar() {
                 );
               })}
             </section>
-
+            <label htmlFor="contrasena" className="text-lg">Contraseña Login:</label>
+            <input
+              type="password"
+              id="contrasena"
+              value={contrasenaEmisor}
+              onChange={(e) => setContrasenaEmisor(e.target.value)}
+              className="text-lg border border-black rounded-md px-2 py-1"
+            />
             <article className='flex justify-end items-center text-lg w-full space-x-2 px-4'>
               <button
                 disabled={credencialesSeleccionadas.length === 0}
@@ -201,6 +215,7 @@ export default function Enviar() {
                 onClick={() => {
                   setSendPassword(false);
                   setCredencialesSeleccionadas([]);
+                  setContrasenaEmisor('');
                 }}
                 className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-900"
               >

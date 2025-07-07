@@ -67,7 +67,7 @@ export default function AddUser() {
             key={i}
             className='relative flex flex-row justify-between bg-white/5 p-4 rounded-2xl shadow-xl border border-white/10 text-white mb-2'>
             <p>{user.nombre_usuario}</p>
-            <button onClick={() => { setSelectedUser({ name: user.nombre_usuario, email: user.correo }); setShowInfoModal(true); setContextMenuUser(null); }}>
+            <button onClick={() => { setSelectedUser({ name: user.nombre_usuario, email: user.correo, rol: user.rol }); setShowInfoModal(true); setContextMenuUser(null); }}>
               <FaEllipsisV />
             </button>
           </article>
@@ -123,21 +123,36 @@ export default function AddUser() {
 
             <form className="flex justify-around pt-2">
               <div>
-                <input type="radio" name="roleInfo" id="userInfo" value="Usuario" checked readOnly />
+                <input
+                  type="radio"
+                  name="roleInfo"
+                  id="userInfo"
+                  value="Usuario"
+                  checked={selectedUser?.rol === "Usuario"}
+                  readOnly
+                />
                 <label htmlFor="userInfo" className="ml-1">Usuario</label>
               </div>
               <div>
-                <input type="radio" name="roleInfo" id="adminInfo" value="Admin" disabled />
+                <input
+                  type="radio"
+                  name="roleInfo"
+                  id="adminInfo"
+                  value="Admin"
+                  checked={selectedUser?.rol === "Admin"}
+                  readOnly
+                />
                 <label htmlFor="adminInfo" className="ml-1">Admin</label>
               </div>
             </form>
 
-            <article className='flex justify-between items-center text-lg w-full px-4'>
-              <a href="#" className='text-red-400 font-semibold hover:underline'>Eliminar</a>
+
+            <article className='flex justify-center items-center text-lg w-full px-4'>
+              {/*<a href="#" className='text-red-400 font-semibold hover:underline'>Eliminar</a>*/}
               <div className='flex space-x-3'>
-                <button onClick={() => setShowEditModal(true)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-800">
+                {/*<button onClick={() => setShowEditModal(true)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-800">
                   Editar
-                </button>
+                </button>*/}
                 <button onClick={() => setShowInfoModal(false)} className="bg-cyan-800 text-white px-4 py-1 rounded hover:bg-cyan-800">
                   Cerrar
                 </button>
