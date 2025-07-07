@@ -11,6 +11,10 @@ from utils.cambiar_contrasena import cambiar_contrasena
 from utils.auth_token import generar_token, verificar_token, generar_token_compartida, cargar_token_compartida
 
 def registrar_rutas(app):
+    @app.route('/', methods=['GET'])
+    def ping():
+        return jsonify({'status': 'alive'}), 200
+    
     @app.route('/extraer_usuarios', methods=['GET'])
     @verificar_token
     def obtener_usuarios():
