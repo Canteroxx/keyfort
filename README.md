@@ -12,7 +12,7 @@
 ## 🧪 Funcionalidades disponibles
 
 - Gestión de contraseñas personales:
-  - Ver, agregar, modificar y eliminar contraseñas propias.
+  - Ver, agregar y eliminar contraseñas propias.
 - Compartición de contraseñas:
   - Compartir credenciales con otros usuarios del sistema.
   - Visualizar contraseñas compartidas recibidas.
